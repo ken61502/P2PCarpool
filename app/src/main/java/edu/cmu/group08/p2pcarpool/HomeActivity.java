@@ -29,6 +29,7 @@ public class HomeActivity extends ActionBarActivity
      */
     private Button mSearchButton = null;
     private Button mSettingButton = null;
+    private Button mGroupRoomButton = null;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -54,7 +55,8 @@ public class HomeActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         mSearchButton = (Button) findViewById(R.id.search_button);
-        mSettingButton = (Button) findViewById(R.id.setting_button);
+        mSettingButton = (Button) findViewById(R.id.profile_button);
+        mGroupRoomButton = (Button) findViewById(R.id.group_room_button);
 
         mSearchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -65,7 +67,15 @@ public class HomeActivity extends ActionBarActivity
 
         mSettingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), SettingActivity.class);
+                Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mGroupRoomButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), GroupRoomActivity.class);
                 startActivity(intent);
             }
         });
@@ -84,12 +94,15 @@ public class HomeActivity extends ActionBarActivity
         switch (number) {
             case 1:
                 mTitle = getString(R.string.title_section1);
+//                setContentView(R.layout.activity_home);
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
+//                setContentView(R.layout.activity_home);
                 break;
             case 3:
                 mTitle = getString(R.string.title_section3);
+//                setContentView(R.layout.activity_setting);
                 break;
         }
     }
@@ -100,7 +113,6 @@ public class HomeActivity extends ActionBarActivity
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

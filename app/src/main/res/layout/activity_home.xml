@@ -12,7 +12,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="341dp"
-            android:layout_height="159dp"
+            android:layout_height="208dp"
             android:layout_gravity="center_horizontal|bottom"
             android:weightSum="1">
 
@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/search_button"
                 android:id="@+id/search_button"
-                android:layout_weight="0.35"
+                android:layout_weight="0.10"
                 android:textSize="25dp"
                 android:layout_margin="5dp"
                 android:background="#394e9d"
@@ -30,10 +30,21 @@
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/setting_button"
-                android:id="@+id/setting_button"
+                android:text="@string/profile_button"
+                android:id="@+id/profile_button"
                 android:layout_gravity="center_horizontal"
-                android:layout_weight="0.35"
+                android:layout_weight="0.10"
+                android:textSize="25dp"
+                android:layout_margin="5dp"
+                android:background="#394e9d"
+                android:textColor="#ffffffff" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/group_room_button"
+                android:id="@+id/group_room_button"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0.10"
                 android:textSize="25dp"
                 android:layout_margin="5dp"
                 android:background="#394e9d"
@@ -41,8 +52,8 @@
         </LinearLayout>
 
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="385dp"
+            android:layout_width="317dp"
+            android:layout_height="317dp"
             android:id="@+id/imageView"
             android:layout_gravity="center_horizontal|top"
             android:src="@drawable/home01" />

@@ -2,6 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.cmu.group08.p2pcarpool" >
 
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.CHANGE_WIFI_STATE"
+        android:required="true" />
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,8 +35,16 @@
                 android:value="edu.cmu.group08.p2pcarpool.HomeActivity" />
         </activity>
         <activity
-            android:name=".SettingActivity"
-            android:label="@string/title_activity_setting"
+            android:name=".ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:parentActivityName=".HomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.cmu.group08.p2pcarpool.HomeActivity" />
+        </activity>
+        <activity
+            android:name=".GroupRoomActivity"
+            android:label="@string/title_activity_group_room"
             android:parentActivityName=".HomeActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

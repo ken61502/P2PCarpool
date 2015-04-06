@@ -1,39 +1,27 @@
 package edu.cmu.group08.p2pcarpool;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TabHost;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
 
 
-public class SearchActivity extends ActionBarActivity {
-
-    private static final int SEND_PORT = 2660;
-    private static final int TO_GROUP_LISTEN_PORT = 2562;
-    private static final int FROM_GROUP_LISTEN_PORT = 2560;
+public class GroupRoomActivity extends ActionBarActivity {
+    private static final int SEND_PORT = 2662;
+    private static final int FROM_SEARCH_LISTEN_PORT = 2562;
+    private static final int TO_SEARCH_LISTEN_PORT = 2560;
     private static final int UPDATE_LOG = 0;
 
     private ArrayList<ListenBroadcast> mListenerList = new ArrayList<>();
@@ -41,30 +29,27 @@ public class SearchActivity extends ActionBarActivity {
     private WifiManager mWifi = null;
     private DatagramSocket mReceiveBroadcastSocket = null;
     private DatagramSocket mSendBroadcastSocket = null;
-
-    private Button mSendBroadcastButton = null;
-    private Button mReceiveBroadcastButton = null;
-
+    private Button mListenRiderButton = null;
     private TextView mLog = null;
     private Handler mReceiveHandler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_group_room);
 
         mWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        mSendBroadcastButton = (Button) findViewById(R.id.send_bc);
-        mReceiveBroadcastButton = (Button) findViewById(R.id.listen_bc);
-        mLog = (TextView) findViewById(R.id.search_log);
+        mListenRiderButton = (Button) findViewById(R.id.listen_rider);
+        mLog = (TextView) findViewById(R.id.listen_rider_log);
 
         try {
             mSendBroadcastSocket = new DatagramSocket(SEND_PORT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
+
         try {
-            mReceiveBroadcastSocket = new DatagramSocket(FROM_GROUP_LISTEN_PORT);
+            mReceiveBroadcastSocket = new DatagramSocket(FROM_SEARCH_LISTEN_PORT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -73,33 +58,24 @@ public class SearchActivity extends ActionBarActivity {
     }
 
     private void setupHandler() {
-        mReceiveHandler = new Handler() {
+        mReceiveHandler= new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 if(msg.what == UPDATE_LOG){
                     mLog.append(String.format("%s\n", msg.obj));
+                    BroadcastPacket packet = new BroadcastPacket(TO_SEARCH_LISTEN_PORT, SEND_PORT, "data");
+                    new SendBroadcast(mWifi, mSendBroadcastSocket, packet).start();
                 }
                 super.handleMessage(msg);
             }
         };
     }
 
-    public void setupListener() {
-        /*
-         *  Broadcast data sending handler
-         */
-        mSendBroadcastButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BroadcastPacket packet = new BroadcastPacket(TO_GROUP_LISTEN_PORT, SEND_PORT, "data");
-                new SendBroadcast(mWifi, mSendBroadcastSocket, packet).start();
-            }
-        });
-
+    private void setupListener() {
         /*
          *  Broadcast data receiving handler
          */
-        mReceiveBroadcastButton.setOnClickListener(new View.OnClickListener() {
+        mListenRiderButton.setOnClickListener(new View.OnClickListener() {
             ListenBroadcast listener = null;
             private boolean start = false;
             @Override
@@ -107,18 +83,17 @@ public class SearchActivity extends ActionBarActivity {
                 if (!start) {
                     if (listener == null) {
                         listener = new ListenBroadcast(
-                                mWifi, mReceiveBroadcastSocket, mReceiveHandler, FROM_GROUP_LISTEN_PORT);
-                        mListenerList.add(listener);
+                                mWifi, mReceiveBroadcastSocket, mReceiveHandler, FROM_SEARCH_LISTEN_PORT);
                         listener.start();
                     }
                     else {
                         listener.resumeThread();
                     }
-                    mReceiveBroadcastButton.setText("Pause Listening");
+                    mListenRiderButton.setText("Pause Listening");
                     start = true;
                 }
                 else {
-                    mReceiveBroadcastButton.setText("Resume Listen BC");
+                    mListenRiderButton.setText("Resume Listen Rider");
                     start = false;
                     listener.pauseThread();
                 }
@@ -134,16 +109,15 @@ public class SearchActivity extends ActionBarActivity {
         mReceiveBroadcastSocket.close();
     }
 
-    @Override
+        @Override
     public void onPause() {
         super.onPause();  // Always call the superclass method first
 
-        mReceiveBroadcastButton.setText("Listen BC");
+            mListenRiderButton.setText("Listen Rider");
         for (ListenBroadcast listener : mListenerList) {
             listener.stopThread();
         }
     }
-
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
@@ -155,7 +129,7 @@ public class SearchActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
+        getMenuInflater().inflate(R.menu.menu_group_room, menu);
         return true;
     }
 
@@ -173,5 +147,4 @@ public class SearchActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }
