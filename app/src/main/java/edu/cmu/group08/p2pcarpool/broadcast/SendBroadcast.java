@@ -1,4 +1,4 @@
-package edu.cmu.group08.p2pcarpool;
+package edu.cmu.group08.p2pcarpool.broadcast;
 
 import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import edu.cmu.group08.p2pcarpool.broadcast.BroadcastPacket;
 
 /**
  * Created by kenny on 2015/4/3.
@@ -33,7 +34,7 @@ public class SendBroadcast extends Thread {
     }
 
 
-    SendBroadcast(WifiManager wifi, DatagramSocket socket, BroadcastPacket packet) {
+    public SendBroadcast(WifiManager wifi, DatagramSocket socket, BroadcastPacket packet) {
         mWifi = wifi;
         mBroadcastSocket = socket;
         mListenPort = packet.getListenPort();

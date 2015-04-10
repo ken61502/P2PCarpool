@@ -1,16 +1,15 @@
-package edu.cmu.group08.p2pcarpool;
+package edu.cmu.group08.p2pcarpool.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.InputType;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,24 +21,66 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import edu.cmu.group08.p2pcarpool.ProfileItem;
+import edu.cmu.group08.p2pcarpool.R;
 
-public class ProfileActivity extends ActionBarActivity {
-    private static final String TAG = "ProfileActivity";
+
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link ProfileFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link ProfileFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class ProfileFragment extends Fragment {
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
     public static final String PROFILE_NAME = "Profile";
+
+    // TODO: Rename and change types of parameters
+    private String mParam1;
+    private String mParam2;
     private static final String profile_item_list [] = {
             "name", "destination", "price_per_passenger", "destination_radius", "car", "max_passengers"};
 
     private ArrayList<ProfileItem> mList = null;
     private ListView mListView = null;
+    private ProfileItemAdapter mAdapter = null;
+    private OnFragmentInteractionListener mListener;
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment ProfileFragment.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static ProfileFragment newInstance(String param1, String param2) {
+        ProfileFragment fragment = new ProfileFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public ProfileFragment() {
+        // Required empty public constructor
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-
-        SharedPreferences settings = getSharedPreferences(PROFILE_NAME, 0);
-
-        mListView = (ListView) findViewById(R.id.list);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+        SharedPreferences settings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
         mList = new ArrayList<>(Arrays.asList(
                 new ProfileItem("Name", settings.getString("name", "Alice")),
                 new ProfileItem("Destination", settings.getString("destination", "5717 Hobart St. Pittsburgh, 15213")),
@@ -48,9 +89,18 @@ public class ProfileActivity extends ActionBarActivity {
                 new ProfileItem("Car", settings.getString("car", "BMW 428")),
                 new ProfileItem("Max Passengers", settings.getString("max_passengers", "4"))
         ));
-        final ProfileItemAdapter adapter = new ProfileItemAdapter(this,
-                R.layout.profile_item_row, mList);
-        mListView.setAdapter(adapter);
+        mAdapter = new ProfileItemAdapter(getActivity(), R.layout.profile_item_row, mList);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        mListView = (ListView) view.findViewById(R.id.list);
+
+        mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -59,8 +109,8 @@ public class ProfileActivity extends ActionBarActivity {
 
                 // ListView Clicked item index
                 final int itemPosition = position;
-                final String itemName = adapter.getItem(itemPosition).name;
-                final String itemValue = adapter.getItem(itemPosition).value;
+                final String itemName = mAdapter.getItem(itemPosition).name;
+                final String itemValue = mAdapter.getItem(itemPosition).value;
 
                 // ListView Clicked item value
                 AlertDialog.Builder alert = new AlertDialog.Builder(view.getContext());
@@ -74,8 +124,8 @@ public class ProfileActivity extends ActionBarActivity {
                 if (itemName.startsWith("Price") || itemName.endsWith("Radius")) {
                     input.setRawInputType(
                             InputType.TYPE_CLASS_NUMBER |
-                            InputType.TYPE_NUMBER_VARIATION_NORMAL |
-                            InputType.TYPE_NUMBER_FLAG_DECIMAL
+                                    InputType.TYPE_NUMBER_VARIATION_NORMAL |
+                                    InputType.TYPE_NUMBER_FLAG_DECIMAL
                     );
                 }
 
@@ -96,7 +146,7 @@ public class ProfileActivity extends ActionBarActivity {
                             }
                             mList.set(itemPosition, new ProfileItem(itemName, value));
                         }
-                        adapter.notifyDataSetChanged();
+                        mAdapter.notifyDataSetChanged();
                     }
                 });
 
@@ -115,39 +165,42 @@ public class ProfileActivity extends ActionBarActivity {
             }
 
         });
+
+        return view;
+    }
+
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
+        }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
 
         saveProfileData();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_setting, menu);
-        return true;
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     private void saveProfileData() {
-        SharedPreferences settings = getSharedPreferences(PROFILE_NAME, 0);
+        SharedPreferences settings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         for (int i = 0; i < profile_item_list.length; i++) {
             editor.putString(profile_item_list[i], mList.get(i).value);
@@ -155,7 +208,7 @@ public class ProfileActivity extends ActionBarActivity {
         editor.commit();
     }
 
-    private class ProfileItemAdapter extends ArrayAdapter<ProfileItem>{
+    private class ProfileItemAdapter extends ArrayAdapter<ProfileItem> {
 
         Context context;
         int layoutResourceId;
@@ -202,4 +255,20 @@ public class ProfileActivity extends ActionBarActivity {
             TextView txtValue;
         }
     }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        public void onFragmentInteraction(Uri uri);
+    }
+
 }

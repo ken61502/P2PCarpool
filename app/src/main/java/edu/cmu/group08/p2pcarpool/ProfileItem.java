@@ -7,11 +7,11 @@ public class ProfileItem {
     public String name = "";
     public String value = "";
 
-    ProfileItem() {
+    public ProfileItem() {
         super();
     }
 
-    ProfileItem(String n, String v) {
+    public ProfileItem(String n, String v) {
         super();
         name = n;
         value = v;

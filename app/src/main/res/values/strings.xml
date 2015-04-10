@@ -3,7 +3,8 @@
 
     <string name="title_section1">Home</string>
     <string name="title_section2">Profile</string>
-    <string name="title_section3">Settings</string>
+    <string name="title_section3">Search</string>
+    <string name="title_section4">Host</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -19,4 +20,8 @@
     <string name="title_activity_profile">Profile</string>
     <string name="group_room_button">Room</string>
     <string name="title_activity_group_room">Group Chatroom</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="host_button">Host</string>
 </resources>

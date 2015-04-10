@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GroupActivity$GroupListFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/advertise_btn"
+                android:layout_width="96dp"
+                android:layout_height="64dp"
+                android:text="register" />
+
+            <Button
+                android:id="@+id/discover_btn"
+                android:layout_width="96dp"
+                android:layout_height="64dp"
+                android:onClick="clickDiscover"
+                android:text="discover" />
+
+            <Button
+                android:id="@+id/connect_btn"
+                android:layout_width="96dp"
+                android:layout_height="64dp"
+                android:onClick="clickConnect"
+                android:text="connect" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/deadvertise_btn"
+                android:layout_width="110dp"
+                android:layout_height="64dp"
+                android:onClick="clickDeadvertise"
+                android:text="unregister" />
+
+            <Button
+                android:id="@+id/undiscover_btn"
+                android:layout_width="110dp"
+                android:layout_height="64dp"
+                android:onClick="clickUndiscover"
+                android:text="undiscover" />
+
+            <Button
+                android:id="@+id/disconnect_btn"
+                android:layout_width="110dp"
+                android:layout_height="64dp"
+                android:onClick="clickDisconnect"
+                android:text="disconnect" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="fill_parent"
+            android:layout_height="221dp"
+            android:focusable="true"
+            android:maxLines = "12"
+            android:scrollbars = "vertical"/>
+
+        <EditText
+            android:id="@+id/msg_input"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/send_btn"
+            android:layout_width="96dp"
+            android:layout_height="64dp"
+            android:onClick="clickSend"
+            android:text="send" />
+
+        <ListView android:id="@android:id/list" android:layout_width="match_parent"
+            android:layout_height="288dp" />
+
+        <TextView android:id="@android:id/empty" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:gravity="center" />
+
+    </LinearLayout>
+</FrameLayout>

@@ -1,4 +1,4 @@
-package edu.cmu.group08.p2pcarpool;
+package edu.cmu.group08.p2pcarpool.broadcast;
 
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
@@ -36,7 +36,7 @@ public class ListenBroadcast extends Thread {
         void addAnnouncedServers(InetAddress[] host, int port[]);
     }
 
-    ListenBroadcast(WifiManager wifi, DatagramSocket socket, Handler handler, int listen_port) {
+    public ListenBroadcast(WifiManager wifi, DatagramSocket socket, Handler handler, int listen_port) {
         mWifi = wifi;
         mBroadcastSocket = socket;
         mHandler = handler;

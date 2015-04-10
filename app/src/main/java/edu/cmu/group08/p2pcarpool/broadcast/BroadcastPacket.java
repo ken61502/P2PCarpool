@@ -1,4 +1,4 @@
-package edu.cmu.group08.p2pcarpool;
+package edu.cmu.group08.p2pcarpool.broadcast;
 
 /**
  * Created by kenny on 2015/4/3.
@@ -9,7 +9,7 @@ public class BroadcastPacket {
     private Object mData = null;
     private int mTime = -1;
 
-    BroadcastPacket(int listen_port, int send_port, Object data) {
+    public BroadcastPacket(int listen_port, int send_port, Object data) {
         mSendPort = send_port;
         mListenPort = listen_port;
         mData = data;

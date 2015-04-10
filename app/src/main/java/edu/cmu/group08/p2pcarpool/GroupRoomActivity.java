@@ -15,7 +15,10 @@ import android.widget.TextView;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.List;
+
+import edu.cmu.group08.p2pcarpool.broadcast.BroadcastPacket;
+import edu.cmu.group08.p2pcarpool.broadcast.ListenBroadcast;
+import edu.cmu.group08.p2pcarpool.broadcast.SendBroadcast;
 
 
 public class GroupRoomActivity extends ActionBarActivity {

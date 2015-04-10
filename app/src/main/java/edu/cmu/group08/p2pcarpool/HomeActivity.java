@@ -1,29 +1,27 @@
 package edu.cmu.group08.p2pcarpool;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.TextView;
+
+import edu.cmu.group08.p2pcarpool.fragment.GroupListFragment;
+import edu.cmu.group08.p2pcarpool.fragment.HomeFragment;
+import edu.cmu.group08.p2pcarpool.fragment.NavigationDrawerFragment;
+import edu.cmu.group08.p2pcarpool.fragment.ProfileFragment;
 
 
 public class HomeActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+                   ProfileFragment.OnFragmentInteractionListener,
+                   GroupListFragment.OnGroupedSelectedListener {
 
+    private static final String TAG = "HomeActivity";
     /**
      * Components for UI.
      */
@@ -54,56 +52,50 @@ public class HomeActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        mSearchButton = (Button) findViewById(R.id.search_button);
-        mSettingButton = (Button) findViewById(R.id.profile_button);
-        mGroupRoomButton = (Button) findViewById(R.id.group_room_button);
-
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), SearchActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        mSettingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        mGroupRoomButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), GroupRoomActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        switch (position) {
+            case 0:
+                HomeFragment homeFragment = new HomeFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, homeFragment)
+                        .commit();
+                break;
+            case 1:
+                ProfileFragment profileFragment = new ProfileFragment();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, profileFragment)
+                        .commit();
+               break;
+            case 2:
+                GroupListFragment groupListFragment = new GroupListFragment();
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, groupListFragment)
+                        .commit();
+                break;
+            default:
+                break;
+        }
     }
 
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
                 mTitle = getString(R.string.title_section1);
-//                setContentView(R.layout.activity_home);
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
-//                setContentView(R.layout.activity_home);
                 break;
             case 3:
                 mTitle = getString(R.string.title_section3);
-//                setContentView(R.layout.activity_setting);
                 break;
+//            case 4:
+//                mTitle = getString(R.string.title_section4);
+//                break;
         }
     }
 
@@ -142,44 +134,13 @@ public class HomeActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    @Override
+    public void onFragmentInteraction(Uri uri) {
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((HomeActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
     }
 
+    @Override
+    public void onGroupedSelected(Integer id) {
+
+    }
 }
