@@ -122,6 +122,8 @@ public class NsdHelper {
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                 Log.e(TAG, "Resolve failed" + errorCode);
+                stopDiscovery();
+                discoverServices();
             }
 
             @Override

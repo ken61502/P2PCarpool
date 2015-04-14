@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,8 +22,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import edu.cmu.group08.p2pcarpool.ProfileItem;
 import edu.cmu.group08.p2pcarpool.R;
+import edu.cmu.group08.p2pcarpool.gmap.GoogleMapAutoComplete;
 
 
 /**
@@ -50,6 +51,8 @@ public class ProfileFragment extends Fragment {
     private ListView mListView = null;
     private ProfileItemAdapter mAdapter = null;
     private OnFragmentInteractionListener mListener;
+
+    private GoogleMapAutoComplete autoComplete = null;
 
     /**
      * Use this factory method to create a new instance of
@@ -118,15 +121,19 @@ public class ProfileFragment extends Fragment {
                 alert.setTitle(itemName);
                 alert.setMessage("Please enter the value:");
 
+                final EditText input;
                 // Set an EditText view to get user input
-                final EditText input = new EditText(view.getContext());
-
-                if (itemName.startsWith("Price") || itemName.endsWith("Radius")) {
-                    input.setRawInputType(
-                            InputType.TYPE_CLASS_NUMBER |
-                                    InputType.TYPE_NUMBER_VARIATION_NORMAL |
-                                    InputType.TYPE_NUMBER_FLAG_DECIMAL
-                    );
+                if (itemName.equals("Destination")) {
+                    input = new AutoCompleteTextView(view.getContext());
+                    autoComplete = new GoogleMapAutoComplete(view.getContext(), (AutoCompleteTextView) input);
+                }
+                else {
+                    input = new EditText(view.getContext());
+                    if (itemName.startsWith("Price") || itemName.endsWith("Radius")) {
+                        input.setRawInputType(
+                                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL
+                        );
+                    }
                 }
 
                 alert.setView(input);
@@ -147,6 +154,7 @@ public class ProfileFragment extends Fragment {
                             mList.set(itemPosition, new ProfileItem(itemName, value));
                         }
                         mAdapter.notifyDataSetChanged();
+                        autoComplete = null;
                     }
                 });
 
@@ -157,11 +165,6 @@ public class ProfileFragment extends Fragment {
                 });
 
                 alert.show();
-                // Show Alert
-//                Toast.makeText(getApplicationContext(),
-//                        "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
-//                        .show();
-
             }
 
         });

@@ -1,8 +1,10 @@
 package edu.cmu.group08.p2pcarpool.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -34,7 +36,7 @@ import edu.cmu.group08.p2pcarpool.group.GroupContent;
  * Activities containing this fragment MUST implement the {@link OnGroupedSelectedListener}
  * interface.
  */
-public class GroupListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class SearchFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     public static final String TAG = "CarpoolGroupList";
 
@@ -42,13 +44,13 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
     private NsdHelper mNsdHelper = null;
     private Handler mUpdateHandler;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     public static final String PROFILE_NAME = "Profile";
-    private static final String TEARDOWN_MESSAGE = "tear_down";
+
     private static final String CHAT_MESSAGE = "chat";
+    private static final String TEARDOWN_MESSAGE = "tear_down";
+    private static final String UPDATE_CLIENT_LIST = "update_client_list";
+    private static final String UPDATE_CLIENT_SERVER_IP = "update_client_server_ip";
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -56,7 +58,7 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
 
     private OnGroupedSelectedListener mListener;
 
-
+    private WifiManager mWifi;
     private SharedPreferences mSettings;
     /**
      * The fragment's ListView/GridView.
@@ -80,21 +82,11 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
      */
     private ListAdapter mAdapter;
 
-    // TODO: Rename and change types of parameters
-    public static GroupListFragment newInstance(String param1, String param2) {
-        GroupListFragment fragment = new GroupListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public GroupListFragment() {
+    public SearchFragment() {
     }
 
     @Override
@@ -102,21 +94,19 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
         mAdapter = new ArrayAdapter<GroupContent.Group>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, GroupContent.ITEMS);
 
+        mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_grouplist, container, false);
-
-        mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
 
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
@@ -161,7 +151,7 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
         };
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler);
+            mConnection = new ChatConnection(mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
@@ -307,7 +297,7 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
         NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
         if (service != null) {
             Log.d(TAG, "Connecting.");
-            mConnection.connectToServer(service.getHost(),
+            mConnection.connectToHost(service.getHost(),
                     service.getPort(), null);
         } else {
             Log.d(TAG, "No service to connect to!");
@@ -331,7 +321,7 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
                 addChatLine(msg);
-                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg);
+                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }
         }
@@ -361,7 +351,7 @@ public class GroupListFragment extends Fragment implements AbsListView.OnItemCli
         super.onResume();
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler);
+            mConnection = new ChatConnection(mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(

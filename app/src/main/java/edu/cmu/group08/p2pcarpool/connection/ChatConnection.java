@@ -16,6 +16,8 @@
 
 package edu.cmu.group08.p2pcarpool.connection;
 
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,13 +53,87 @@ public class ChatConnection {
     private HashMap<String, ChatClient> mChatClients = new HashMap<>();
 
     private static final String TAG = "ChatConnection";
-    private static final String TEARDOWN_MESSAGE = "tear_down";
+    private static final String DUMMY = "GROUP08";
     private static final String CHAT_MESSAGE = "chat";
+    private static final String TEARDOWN_MESSAGE = "tear_down";
+    private static final String UPDATE_CLIENT_LIST = "update_client_list";
+    private static final String UPDATE_CLIENT_SERVER_IP = "update_client_server_ip";
+    private WifiManager mWifi;
     private int mPort = -1;
+    private String mHostAddress = null;
 
-    public ChatConnection(Handler handler) {
+    public ChatConnection(Handler handler, WifiManager wifi) {
         mUpdateHandler = handler;
         mChatServer = new ChatServer(handler);
+        mWifi = wifi;
+    }
+
+    public void updateClientServerIp(String client_ip_port, String server_port) {
+        if (mChatClients.containsKey(client_ip_port)) {
+            mChatClients.get(client_ip_port).setServerAddressPort(client_ip_port, server_port);
+        }
+        else {
+            Log.d(TAG, "Client does not exist.");
+        }
+    }
+
+    public void updateClientList(String ip_list) {
+        String[] ips = ip_list.split(",");
+        String local_ip = getIpAddress().toString();
+        for (int i = 0; i < ips.length; i++) {
+            String ip_port = ips[i];
+            if (!mChatClients.containsKey(ip_port)) {
+                String[] tokens = ip_port.trim().split(":");
+                if (!tokens[0].equals(local_ip)) {
+                    InetAddress addr;
+                    try {
+                        addr = InetAddress.getByName(tokens[0].replace("/",""));
+                        if (local_ip.compareTo(tokens[0]) > 0) {
+                            Log.d(TAG, "Connected to " + ip_port);
+                            connectToRemote(addr, Integer.parseInt(tokens[1]), null);
+                        }
+                        else {
+                            Log.d(TAG, "Waiting " + ip_port + " to connect me.");
+                        }
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    Log.d(TAG, ip_port + " local address.");
+                }
+            }
+            else {
+                Log.d(TAG, ip_port + " is already connected.");
+            }
+        }
+    }
+
+    public void connectToHost(InetAddress address, int port, Socket socket) {
+        ChatClient client;
+        String ip_port = address.toString() + ":" + Integer.toString(port);
+        if (!mChatClients.containsKey(ip_port)) {
+            client = new ChatClient(address, port, socket);
+            mChatClients.put(ip_port, client);
+        }
+        else {
+            Log.d(TAG, "Client already connected");
+        }
+        Log.d(TAG, getIpAddress().toString());
+        mHostAddress = ip_port;
+        sendDirectMessage(ip_port, UPDATE_CLIENT_SERVER_IP, mChatServer.getPort(), DUMMY);
+    }
+
+    public void connectToRemote(InetAddress address, int port, Socket socket) {
+        ChatClient client;
+        String ip_port = address.toString() + ":" + Integer.toString(port);
+        if (!mChatClients.containsKey(ip_port)) {
+            client = new ChatClient(address, port, socket);
+            mChatClients.put(ip_port, client);
+        }
+        else {
+            Log.d(TAG, "Client already connected");
+        }
     }
 
     public void tearDown() {
@@ -67,18 +143,6 @@ public class ChatConnection {
         }
         if (!mChatClients.isEmpty()) {
             tearDownAllClient();
-        }
-    }
-
-    public void connectToServer(InetAddress address, int port, Socket socket) {
-        ChatClient client;
-        String ip_port = address.toString() + ":" + Integer.toString(port);
-        if (!mChatClients.containsKey(ip_port)) {
-            client = new ChatClient(address, port, socket);
-            mChatClients.put(ip_port, client);
-        }
-        else {
-            Log.d(TAG, "Client already connected");
         }
     }
 
@@ -104,6 +168,7 @@ public class ChatConnection {
             Log.d(TAG, "Client list is empty");
         }
     }
+
     public void tearDownClientWithIp(String ip_port, boolean flood) {
         if (mChatClients.containsKey(ip_port)) {
             mChatClients.get(ip_port).tearDown(flood);
@@ -113,19 +178,52 @@ public class ChatConnection {
             Log.d(TAG, "Client manager doesn't has IP = " + ip_port);
         }
     }
-    public void sendMulticastMessage(String type, String msg) {
+
+    public void sendDirectMessage(String ip_port, String type, String msg, String sender) {
+        if (mChatClients.containsKey(ip_port)) {
+            mChatClients.get(ip_port).addMessageToQueue(type, msg, sender);
+        }
+        else {
+            Log.e(TAG, "Client list does not contain " + ip_port);
+        }
+    }
+
+    public void sendMulticastMessage(String type, String msg, String sender) {
         if (!mChatClients.isEmpty()) {
             Iterator it = mChatClients.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<String, ChatClient> entry = (Map.Entry<String, ChatClient>) it.next();
-                entry.getValue().sendMessage(type, msg);
+                entry.getValue().addMessageToQueue(type, msg, sender);
             }
         }
         else {
             Log.d(TAG, "Client list is empty");
         }
     }
-    
+
+    public InetAddress getIpAddress() {
+        WifiInfo wifiInfo = mWifi.getConnectionInfo();
+        if (wifiInfo == null) {
+            Log.d(TAG, "Could not get wifi info");
+            return null;
+        }
+        int ip = wifiInfo.getIpAddress();
+        byte[] quads = new byte[4];
+        for (int k = 0; k < 4; k++)
+            quads[k] = (byte) ((ip >> k * 8) & 0xFF);
+        try {
+            Log.d(TAG, "IP:" + InetAddress.getByAddress(quads).toString());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        try {
+            return InetAddress.getByAddress(quads);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public int getLocalPort() {
         return mPort;
     }
@@ -134,27 +232,45 @@ public class ChatConnection {
         mPort = port;
     }
 
-    public synchronized void updateMessages(String msg, boolean local) {
-        Log.e(TAG, "Updating message: " + msg);
+//    public synchronized void updateMessages(String msg, boolean local) {
+//        Log.e(TAG, "Updating message: " + msg);
+//
+//        if (local) {
+//            msg = "me: " + msg;
+//        } else {
+//            msg = "them: " + msg;
+//        }
+//
+//        sendHandlerMessage("chat", msg, -1);
+//
+//    }
 
-        if (local) {
-            msg = "me: " + msg;
-        } else {
-            msg = "them: " + msg;
-        }
-
-        sendHandlerMessage("chat", msg, -1);
-
-    }
-
-    private String patchMessage(String type, String msg) {
-        return type + ":" + msg;
+    private String patchMessage(String type, String msg, String sender) {
+        return type + ":" + sender + ":" + msg;
+//        return type + ":" + msg;
     }
 
     private String[] unpatchMessage(String patchedMsg) {
-        return patchedMsg.split(":", 2);
+        return patchedMsg.split(":", 3);
+//        return patchedMsg.split(":", 2);
     }
 
+    //For Chat Message ONLY
+    public synchronized void sendHandlerMessage(String op, String msg, int id, boolean self, String sender) {
+        Log.d(TAG, "Sender:" + sender);
+        Log.d(TAG, "Message:" + msg);
+        Bundle messageBundle = new Bundle();
+        messageBundle.putString("op", op);
+        messageBundle.putString("msg", msg);
+        messageBundle.putInt("id", id);
+        messageBundle.putString("sender", sender);
+        messageBundle.putBoolean("self", self);
+        Message message = new Message();
+        message.setData(messageBundle);
+        mUpdateHandler.sendMessage(message);
+    }
+
+    //For other use.
     public synchronized void sendHandlerMessage(String op, String msg, int id) {
         Bundle messageBundle = new Bundle();
         messageBundle.putString("op", op);
@@ -179,6 +295,9 @@ public class ChatConnection {
             mThread.start();
         }
 
+        public String getPort() {
+            return Integer.toString(mServerSocket.getLocalPort());
+        }
         public void tearDown() {
             mThread.interrupt();
         }
@@ -206,10 +325,10 @@ public class ChatConnection {
                     // used.  Just grab an available one  and advertise it via Nsd.
                     mServerSocket = new ServerSocket(0);
                     setLocalPort(mServerSocket.getLocalPort());
-///////
+
                     sendHandlerMessage("error",
                             mServerSocket.getInetAddress().toString()+":"+Integer.toString(mServerSocket.getLocalPort()), -1);
-///////
+
                     while (!Thread.currentThread().isInterrupted()) {
                         Log.d(TAG, "ServerSocket Created, awaiting connection");
                         Socket socket = mServerSocket.accept();
@@ -218,16 +337,15 @@ public class ChatConnection {
                         int port = socket.getPort();
                         InetAddress address = socket.getInetAddress();
                         String ip_port = address.toString()+":"+Integer.toString(port);
-///////
-                        sendHandlerMessage("join", ip_port, -1);
-///////
-//                        if (!clientSocket.containsKey(ip_port)) {
-//                            clientSocket.put(ip_port, socket);
-                        connectToServer(address, port, socket);
-//                        }
-//                        else {
-//                            Log.d(TAG, "Client already connected.");
-//                        }
+
+                        connectToRemote(address, port, socket);
+
+                        // mHostAddress is fulfilled only when user click connect to Host
+                        if (mHostAddress == null) {
+                            sendHandlerMessage("join", ip_port, -1);
+                            Thread updateThread = new Thread(new UpdateClientListThread());
+                            updateThread.start();
+                        }
                     }
                     try {
                         mServerSocket.close();
@@ -241,6 +359,56 @@ public class ChatConnection {
                 }
             }
         }
+        class UpdateClientListThread implements Runnable {
+
+            @Override
+            public void run() {
+                if (!mChatClients.isEmpty()) {
+                    Iterator it = mChatClients.entrySet().iterator();
+                    String list = "";
+                    Map.Entry<String, ChatClient> entry;
+
+                    it.hasNext();
+                    entry = (Map.Entry<String, ChatClient>) it.next();
+                    String s_ip;
+                    while((s_ip = entry.getValue().getServerIpPort()) == null) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+                        }
+                    }
+                    list += s_ip;
+                    while (it.hasNext()) {
+                        entry = (Map.Entry<String, ChatClient>) it.next();
+                        while((s_ip = entry.getValue().getServerIpPort()) == null) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+//                            e.printStackTrace();
+                            }
+                        }
+                        list += ("," + s_ip);
+                    }
+
+                    it = mChatClients.entrySet().iterator();
+                    while (it.hasNext()) {
+                        entry = (Map.Entry<String, ChatClient>) it.next();
+                        while(!entry.getValue().sendMessage(UPDATE_CLIENT_LIST, list, DUMMY)) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+                else {
+                    Log.d(TAG, "Client list is empty");
+                }
+            }
+
+        }
     }
     /*
      *  ChatClient Class
@@ -249,13 +417,18 @@ public class ChatConnection {
 
         private InetAddress mAddress;
         private int PORT;
+        private InetAddress mServerAddress = null;
+        private int mServerPort = -1;
 
         private final String CLIENT_TAG = "ChatClient";
 
         private Socket mSocket;
         private Thread mSendThread;
         private Thread mRecThread;
-        private ObjectOutputStream mOutStream = null;
+
+        private int QUEUE_CAPACITY = 100;
+        private BlockingQueue<String> mMessageQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+
         public ChatClient(InetAddress address, int port, Socket socket) {
 
             Log.d(CLIENT_TAG, "Creating chatClient");
@@ -263,61 +436,119 @@ public class ChatConnection {
             this.PORT = port;
             this.mSocket = socket;
 
-            mSendThread = new Thread(new SendingThread());
+            mSendThread = new Thread(new SendingThread(mMessageQueue));
             mSendThread.start();
+        }
+
+        public void setServerAddressPort(String client_ip_port, String server_port) {
+            String[] client_ip_port_token = client_ip_port.split(":", 2);
+            Log.d(CLIENT_TAG, server_port);
+            Log.d(CLIENT_TAG, client_ip_port);
+            try {
+                mServerAddress = InetAddress.getByName(client_ip_port_token[0].replace("/", ""));
+                mServerPort = Integer.parseInt(server_port);
+
+                Log.d(CLIENT_TAG, "Server Address for " + mAddress.toString() + " set: " + getServerAddress().toString()+":"+ Integer.toString(getServerPort()));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
+        public String getLocalIpPort() {
+            if (mSocket != null) {
+                return mSocket.getLocalAddress().toString()+":"+mSocket.getLocalPort();
+            }
+            else {
+                return null;
+            }
+        }
+        public String getServerIpPort() {
+            if (mServerAddress != null && mServerPort != -1) {
+                return mServerAddress.toString() + ":" + Integer.toString(mServerPort);
+            }
+            else {
+                return null;
+            }
+        }
+        public String getServerIp() {
+            if (mServerAddress != null) {
+                return mServerAddress.toString();
+            }
+            else {
+                return null;
+            }
+        }
+        public InetAddress getServerAddress() {
+            return mServerAddress;
+        }
+        public int getServerPort() {
+            return mServerPort;
         }
         public void tearDown(boolean flood) {
             Log.e(CLIENT_TAG, "ClientChat Teardown");
             if (flood) {
-                sendMessage(TEARDOWN_MESSAGE, "");
+                sendMessage(TEARDOWN_MESSAGE, "", "");
             }
             mSendThread.interrupt();
             mRecThread.interrupt();
         }
 
-        public void sendMessage(String type, String msg) {
+        public void addMessageToQueue(String type, String msg, String sender) {
+            try {
+                mMessageQueue.put(patchMessage(type, msg, sender));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public boolean sendMessage(String type, String msg, String sender) {
             try {
                 if (mSocket == null) {
-                    Log.d(CLIENT_TAG, "Socket is null, wtf?");
-                } else if (mSocket.getOutputStream() == null) {
-                    Log.d(CLIENT_TAG, "Socket output stream is null, wtf?");
+                    Log.e(CLIENT_TAG, "Socket is null");
+                    return false;
+                }
+                else if (mSocket.getOutputStream() == null) {
+                    Log.e(CLIENT_TAG, "Socket output stream is null");
+                    return false;
                 }
 
-//                if (mOutStream == null) {
-//                    mOutStream = new ObjectOutputStream(mSocket.getOutputStream());
-//                }
-//
-//                mOutStream.writeObject(new GroupMessage(type, msg));
                 PrintWriter out = new PrintWriter(
                         new BufferedWriter(
                                 new OutputStreamWriter(mSocket.getOutputStream())), true);
-                /////////Temp///////
-                out.println(patchMessage(type, msg));
-                ////////////////////
+                if (type != null) {
+                    out.println(patchMessage(type, msg, sender));
+                }
+                else {
+                    out.println(msg);
+
+                    String[] t = unpatchMessage(msg);
+                    if (t[0].equals(CHAT_MESSAGE)) {
+                        sendHandlerMessage("chat", t[2], -1, true, t[1]);
+                    }
+                }
 
                 out.flush();
-//                mOutStream.flush();
-                if (type.equals(CHAT_MESSAGE)) {
-                    updateMessages(msg, true);
-                }
+
+                Log.d(CLIENT_TAG, "Client sent message: " + msg);
+                return true;
             } catch (UnknownHostException e) {
-                Log.d(CLIENT_TAG, "Unknown Host", e);
+                Log.e(CLIENT_TAG, "Unknown Host", e);
+                return false;
             } catch (IOException e) {
-                Log.d(CLIENT_TAG, "I/O Exception", e);
+                Log.e(CLIENT_TAG, "I/O Exception", e);
+                return false;
             } catch (Exception e) {
-                Log.d(CLIENT_TAG, "Error3", e);
+                Log.e(CLIENT_TAG, "Error3", e);
+                return false;
             }
-            Log.d(CLIENT_TAG, "Client sent message: " + msg);
         }
 
 
         class SendingThread implements Runnable {
 
-            BlockingQueue<String> mMessageQueue;
-            private int QUEUE_CAPACITY = 10;
+            private final BlockingQueue<String> mMessageQueue;
 
-            public SendingThread() {
-                mMessageQueue = new ArrayBlockingQueue<String>(QUEUE_CAPACITY);
+            public SendingThread(BlockingQueue q) {
+                mMessageQueue = q;
             }
 
             @Override
@@ -325,10 +556,10 @@ public class ChatConnection {
                 try {
                     if (mSocket == null) {
                         mSocket = new Socket(mAddress, PORT);
-                        Log.d(CLIENT_TAG, "Client-side socket initialized.");
+                        Log.d(CLIENT_TAG, "Client connect to server: Socket initialized");
 
                     } else {
-                        Log.d(CLIENT_TAG, "Socket already initialized. skipping!");
+                        Log.d(CLIENT_TAG, "Server accept client: Socket already initialized. No need to create new socket.");
                     }
 
                     mRecThread = new Thread(new ReceivingThread());
@@ -343,14 +574,14 @@ public class ChatConnection {
                 while (true) {
                     try {
                         String msg = mMessageQueue.take();
-                        sendMessage(CHAT_MESSAGE, msg);
+                        String type = unpatchMessage(msg)[0];
+                        if (type.equals(UPDATE_CLIENT_SERVER_IP)) {
+                            msg += ("," + getLocalIpPort());
+                            Log.d(CLIENT_TAG, getLocalIpPort());
+                        }
+                        sendMessage(null, msg, null);
                     } catch (InterruptedException ie) {
                         Log.d(CLIENT_TAG, "Message sending loop interrupted, exiting");
-//                        try {
-//                            mOutStream.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
                     }
                 }
             }
@@ -358,39 +589,40 @@ public class ChatConnection {
 
 
         class ReceivingThread implements Runnable {
-
             @Override
             public void run() {
 
                 BufferedReader input;
-//                ObjectInputStream input;
                 try {
                     input = new BufferedReader(new InputStreamReader(
                             mSocket.getInputStream()));
-//                    input = new ObjectInputStream(mSocket.getInputStream());
                     while (!Thread.currentThread().isInterrupted() && !mSocket.isClosed()) {
-//                        GroupMessage messageStr;
-//                        messageStr = (GroupMessage) input.readObject();
                         String messageStr;
                         messageStr = input.readLine();
                         if (messageStr != null) {
                             Log.d(CLIENT_TAG, "Read from the stream: " + messageStr);
 
-                            /////////Temp///////
                             String[] data = unpatchMessage(messageStr);
                             String type = data[0],
-                                   msg = data[1],
+                                   sender = data[1],
+                                   msg = data[2],
                                    ip_port = mAddress.toString()+":"+Integer.toString(PORT);
-                            /////////Temp///////
-
-//                            updateMessages(messageStr, false);
 
                             if (type.equals(CHAT_MESSAGE)) {
-                                updateMessages(msg, false);
+//                                updateMessages(msg, false);
+                                sendHandlerMessage("chat", msg, -1, false, sender);
                             }
                             else if (type.equals(TEARDOWN_MESSAGE)) {
                                 sendHandlerMessage("leave", ip_port, -1);
                                 tearDownClientWithIp(ip_port, false);
+                            }
+                            else if (type.equals(UPDATE_CLIENT_LIST)) {
+                                updateClientList(msg);
+                            }
+                            else if (type.equals(UPDATE_CLIENT_SERVER_IP)) {
+                                String[] ips = msg.split(",", 2);
+                                Log.d(CLIENT_TAG, ips[1]);
+                                updateClientServerIp(ips[1], ips[0]);
                             }
                         } else {
                             Log.d(CLIENT_TAG, "The nulls! The nulls!");
@@ -408,9 +640,6 @@ public class ChatConnection {
                     Log.e(TAG, "Server loop error: ", e);
                     e.printStackTrace();
                 }
-//                catch (ClassNotFoundException e) {
-//                    e.printStackTrace();
-//                }
             }
         }
     }

@@ -42,14 +42,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.cmu.group08.p2pcarpool.HomeActivity" />
         </activity>
-        <activity
-            android:name=".GroupRoomActivity"
-            android:label="@string/title_activity_group_room"
-            android:parentActivityName=".HomeActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="edu.cmu.group08.p2pcarpool.HomeActivity" />
-        </activity>
     </application>
 
 </manifest>

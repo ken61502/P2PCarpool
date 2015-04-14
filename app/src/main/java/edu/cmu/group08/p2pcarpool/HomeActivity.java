@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Button;
 
-import edu.cmu.group08.p2pcarpool.fragment.GroupListFragment;
+import edu.cmu.group08.p2pcarpool.fragment.SearchFragment;
 import edu.cmu.group08.p2pcarpool.fragment.HomeFragment;
 import edu.cmu.group08.p2pcarpool.fragment.NavigationDrawerFragment;
 import edu.cmu.group08.p2pcarpool.fragment.ProfileFragment;
@@ -19,7 +19,7 @@ import edu.cmu.group08.p2pcarpool.fragment.ProfileFragment;
 public class HomeActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
                    ProfileFragment.OnFragmentInteractionListener,
-                   GroupListFragment.OnGroupedSelectedListener {
+                   SearchFragment.OnGroupedSelectedListener {
 
     private static final String TAG = "HomeActivity";
     /**
@@ -72,9 +72,9 @@ public class HomeActivity extends ActionBarActivity
                         .commit();
                break;
             case 2:
-                GroupListFragment groupListFragment = new GroupListFragment();
+                SearchFragment searchFragment = new SearchFragment();
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, groupListFragment)
+                        .replace(R.id.container, searchFragment)
                         .commit();
                 break;
             default:

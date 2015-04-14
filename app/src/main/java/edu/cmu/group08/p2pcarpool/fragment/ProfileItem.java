@@ -1,4 +1,4 @@
-package edu.cmu.group08.p2pcarpool;
+package edu.cmu.group08.p2pcarpool.fragment;
 
 /**
  * Created by kenny on 2015/4/5.

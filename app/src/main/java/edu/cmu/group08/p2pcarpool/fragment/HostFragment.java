@@ -1,7 +1,9 @@
 package edu.cmu.group08.p2pcarpool.fragment;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.os.Handler;
@@ -13,7 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.cmu.group08.p2pcarpool.connection.ChatConnection;
 import edu.cmu.group08.p2pcarpool.connection.NsdHelper;
@@ -43,11 +49,14 @@ public class HostFragment extends Fragment {
     private NsdHelper mNsdHelper = null;
     private Handler mUpdateHandler;
     private SharedPreferences mSettings;
+    private WifiManager mWifi;
 
     private TextView mMessage_window;
     private Button mSendBtn;
     private EditText mEditMsg;
-
+    private ListView listViewMessages;
+    private List<Message> listMessages;
+    private MessagesListAdapter adapter;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -79,17 +88,46 @@ public class HostFragment extends Fragment {
         }
 
         mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
+        mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
 
+//        mUpdateHandler = new Handler() {
+//            @Override
+//            public void handleMessage(Message msg) {
+//                String operation = msg.getData().getString("op");
+//                String message = msg.getData().getString("msg");
+//                int group_id = msg.getData().getInt("id");
+//
+//                if (operation.equals("chat")) {
+//                    Log.d(TAG, "Received Message: " + message);
+//                    addChatLine(message);
+//                }
+//                else if (operation.equals("error")) {
+//                    Log.e(TAG, "Received Debug: " + message);
+////                    addChatLine(message);
+//                }
+//                else if (operation.equals("join")) {
+//                    Log.e(TAG, message + " has joined");
+//                    addChatLine(message + " has joined");
+//                }
+//                else if (operation.equals("leave")) {
+//                    Log.e(TAG, message + " has leaved");
+//                    addChatLine(message + " has leaved");
+//                }
+//            }
+//        };
         mUpdateHandler = new Handler() {
+            //Receiver side message should be displayed at left.
+
             @Override
             public void handleMessage(Message msg) {
                 String operation = msg.getData().getString("op");
                 String message = msg.getData().getString("msg");
                 int group_id = msg.getData().getInt("id");
-
                 if (operation.equals("chat")) {
-                    Log.d(TAG, "Received Message: " + message);
-                    addChatLine(message);
+                    Log.d(TAG, "Sender:" + msg.getData().getString("sender"));
+                    Log.d(TAG, "Message:" + msg.getData().getString("msg"));
+                    Log.d(TAG, "Self:" + msg.getData().getBoolean("self"));
+                    addChatLine(msg);
                 }
                 else if (operation.equals("error")) {
                     Log.e(TAG, "Received Debug: " + message);
@@ -97,17 +135,19 @@ public class HostFragment extends Fragment {
                 }
                 else if (operation.equals("join")) {
                     Log.e(TAG, message + " has joined");
-                    addChatLine(message + " has joined");
+                //TODO add system message display in the middle
+//                    addChatLine(message + " has joined");
                 }
                 else if (operation.equals("leave")) {
                     Log.e(TAG, message + " has leaved");
-                    addChatLine(message + " has leaved");
+                //TODO
+//                    addChatLine(message + " has left");
                 }
             }
         };
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler);
+            mConnection = new ChatConnection(mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
@@ -143,8 +183,13 @@ public class HostFragment extends Fragment {
         mEditMsg = (EditText) view.findViewById(R.id.msg_input);
         mEditMsg.setText("");
 
-        mMessage_window = (TextView) view.findViewById(R.id.message_window);
-        mMessage_window.setMovementMethod(new ScrollingMovementMethod());
+        //mMessage_window = (TextView) view.findViewById(R.id.message_window);
+        //mMessage_window.setMovementMethod(new ScrollingMovementMethod());
+        listViewMessages = (ListView) view.findViewById(R.id.message_window);
+        listMessages = new ArrayList<Message>();
+        Context context = getActivity().getApplicationContext();
+        adapter = new MessagesListAdapter(context, listMessages);
+        listViewMessages.setAdapter(adapter);
 
         mSendBtn = (Button) view.findViewById(R.id.send_btn);
         mSendBtn.setOnClickListener(new View.OnClickListener() {
@@ -154,19 +199,45 @@ public class HostFragment extends Fragment {
             }
         });
     }
+//    public void clickSend(View v) {
+//        if (mEditMsg != null) {
+//            String msg = mEditMsg.getText().toString();
+//            if (!msg.isEmpty()) {
+//                addChatLine(msg);
+//                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg);
+//                mEditMsg.setText("");
+//            }
+//        }
+//    }
     public void clickSend(View v) {
         if (mEditMsg != null) {
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
-                addChatLine(msg);
-                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg);
+
+                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }
         }
     }
-    public void addChatLine(String line) {
-        mMessage_window.append("\n" + line);
+//    public void addChatLine(String line) {
+//        mMessage_window.append("\n" + line);
+//    }
+
+    public void addChatLine(Message msg) {
+        //Attention
+        //Must do a copy of the message and then add it to
+        Bundle messageBundle = new Bundle();
+        messageBundle.putString("op", CHAT_MESSAGE);
+        messageBundle.putString("sender", msg.getData().getString("sender"));
+        messageBundle.putBoolean("self",msg.getData().getBoolean("self"));
+        messageBundle.putString("msg", msg.getData().getString("msg"));
+        messageBundle.putInt("id", -1);
+        Message message = new Message();
+        message.setData(messageBundle);
+        listMessages.add(message);
+        adapter.notifyDataSetChanged();
     }
+
     @Override
     public void onPause() {
         if (mNsdHelper != null) {
@@ -187,7 +258,7 @@ public class HostFragment extends Fragment {
         super.onResume();
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler);
+            mConnection = new ChatConnection(mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(

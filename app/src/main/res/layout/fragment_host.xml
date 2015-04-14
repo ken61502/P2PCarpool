@@ -1,13 +1,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context="edu.cmu.group08.p2pcarpool.fragment.HostFragment">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="edu.cmu.group08.p2pcarpool.fragment.HostFragment">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="1">
+        <!-- Kenny
         <TextView
             android:id="@+id/message_window"
             android:layout_width="fill_parent"
@@ -30,5 +31,47 @@ tools:context="edu.cmu.group08.p2pcarpool.fragment.HostFragment">
             android:layout_height="64dp"
             android:onClick="clickSend"
             android:text="send" />
+
+        -->
+
+        <ListView
+            android:id="@+id/message_window"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:divider="@null"
+            android:transcriptMode="alwaysScroll"
+            android:stackFromBottom="true">
+        </ListView>
+
+        <LinearLayout
+            android:id="@+id/llMsgCompose"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:weightSum="3" >
+
+            <EditText
+                android:id="@+id/msg_input"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="2"
+                android:background="@color/bg_msg_input"
+                android:textColor="@color/text_msg_input"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"/>
+
+            <Button
+                android:id="@+id/send_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/bg_btn_join"
+                android:textColor="@color/white"
+                android:text="@string/btn_send" />
+        </LinearLayout>
+
     </LinearLayout>
 </FrameLayout>
