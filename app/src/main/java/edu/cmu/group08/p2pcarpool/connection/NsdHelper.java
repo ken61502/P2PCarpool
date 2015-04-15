@@ -225,6 +225,7 @@ public class NsdHelper {
     
     public synchronized void stopDiscovery() {
         if (mDiscoveryStatus == Status.STARTED && mNsdManager != null) {
+            sendHandlerMessage("clear_all", null, -1, false, SYSTEM_SENDER);
             mNsdManager.stopServiceDiscovery(mDiscoveryListener);
             mDiscoveryStatus = Status.STOPPED;
         }

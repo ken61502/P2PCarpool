@@ -10,57 +10,57 @@
         android:orientation="vertical"
         android:weightSum="1">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal" >-->
 
-            <Button
-                android:id="@+id/advertise_btn"
-                android:layout_width="96dp"
-                android:layout_height="64dp"
-                android:text="register" />
+            <!--<Button-->
+                <!--android:id="@+id/advertise_btn"-->
+                <!--android:layout_width="96dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:text="register" />-->
 
-            <Button
-                android:id="@+id/discover_btn"
-                android:layout_width="96dp"
-                android:layout_height="64dp"
-                android:onClick="clickDiscover"
-                android:text="discover" />
+            <!--<Button-->
+                <!--android:id="@+id/discover_btn"-->
+                <!--android:layout_width="96dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:onClick="clickDiscover"-->
+                <!--android:text="discover" />-->
 
-            <Button
-                android:id="@+id/connect_btn"
-                android:layout_width="96dp"
-                android:layout_height="64dp"
-                android:onClick="clickConnect"
-                android:text="connect" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            <!--<Button-->
+                <!--android:id="@+id/connect_btn"-->
+                <!--android:layout_width="96dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:onClick="clickConnect"-->
+                <!--android:text="connect" />-->
+        <!--</LinearLayout>-->
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal" >-->
 
-            <Button
-                android:id="@+id/deadvertise_btn"
-                android:layout_width="110dp"
-                android:layout_height="64dp"
-                android:onClick="clickDeadvertise"
-                android:text="unregister" />
+            <!--<Button-->
+                <!--android:id="@+id/deadvertise_btn"-->
+                <!--android:layout_width="110dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:onClick="clickDeadvertise"-->
+                <!--android:text="unregister" />-->
 
-            <Button
-                android:id="@+id/undiscover_btn"
-                android:layout_width="110dp"
-                android:layout_height="64dp"
-                android:onClick="clickUndiscover"
-                android:text="undiscover" />
+            <!--<Button-->
+                <!--android:id="@+id/undiscover_btn"-->
+                <!--android:layout_width="110dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:onClick="clickUndiscover"-->
+                <!--android:text="undiscover" />-->
 
-            <Button
-                android:id="@+id/disconnect_btn"
-                android:layout_width="110dp"
-                android:layout_height="64dp"
-                android:onClick="clickDisconnect"
-                android:text="disconnect" />
-        </LinearLayout>
+            <!--<Button-->
+                <!--android:id="@+id/disconnect_btn"-->
+                <!--android:layout_width="110dp"-->
+                <!--android:layout_height="64dp"-->
+                <!--android:onClick="clickDisconnect"-->
+                <!--android:text="disconnect" />-->
+        <!--</LinearLayout>-->
         <!--
                 <TextView
                     android:id="@+id/status"

@@ -54,6 +54,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     private static final String TEARDOWN_MESSAGE = "tear_down";
     private static final String UPDATE_CLIENT_LIST = "update_client_list";
     private static final String UPDATE_CLIENT_SERVER_IP = "update_client_server_ip";
+    private static final String SYSTEM_SENDER = "System Message";
+
 
 
     // TODO: Rename and change types of parameters
@@ -122,11 +124,10 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         mListView.setOnItemClickListener(this);
 
         mStatusView = (ListView) view.findViewById(R.id.message_window);
-        listMessages = new ArrayList<Message>();
+        listMessages = new ArrayList<Message> ();
         Context context = getActivity().getApplicationContext();
         adapter = new MessagesListAdapter(context, listMessages);
         mStatusView.setAdapter(adapter);
-
 
         initializeOnClickListener(view);
 
@@ -176,59 +177,62 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                     mSettings.getString("destination", "5717 Hobart St. Pittsburgh, 15213")
             );
             mNsdHelper.initializeNsd();
+            mNsdHelper.discoverServices();
         }
 
         return view;
     }
 
     public void initializeOnClickListener(View view) {
-        mAdvertiseBtn = (Button) view.findViewById(R.id.advertise_btn);
-        mDiscoverBtn = (Button) view.findViewById(R.id.discover_btn);
-        mConnectBtn = (Button) view.findViewById(R.id.connect_btn);
 
-        mDeadvertiseBtn = (Button) view.findViewById(R.id.deadvertise_btn);
-        mUndiscoverBtn = (Button) view.findViewById(R.id.undiscover_btn);
-        mDisconnectBtn = (Button) view.findViewById(R.id.disconnect_btn);
+//        mAdvertiseBtn = (Button) view.findViewById(R.id.advertise_btn);
+//        mDiscoverBtn = (Button) view.findViewById(R.id.discover_btn);
+//        mConnectBtn = (Button) view.findViewById(R.id.connect_btn);
+//
+//        mDeadvertiseBtn = (Button) view.findViewById(R.id.deadvertise_btn);
+//        mUndiscoverBtn = (Button) view.findViewById(R.id.undiscover_btn);
+//        mDisconnectBtn = (Button) view.findViewById(R.id.disconnect_btn);
 
         mSendBtn = (Button) view.findViewById(R.id.send_btn);
 
-        mAdvertiseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickAdvertise(v);
-            }
-        });
-        mDiscoverBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickDiscover(v);
-            }
-        });
-        mConnectBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickConnect(v);
-            }
-        });
+//        mAdvertiseBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickAdvertise(v);
+//            }
+//        });
+//        mDiscoverBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickDiscover(v);
+//            }
+//        });
+//        mConnectBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickConnect(v);
+//            }
+//        });
+//
+//        mDeadvertiseBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickDeadvertise(v);
+//            }
+//        });
+//        mUndiscoverBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickUndiscover(v);
+//            }
+//        });
+//        mDisconnectBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickDisconnect(v);
+//            }
+//        });
 
-        mDeadvertiseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickDeadvertise(v);
-            }
-        });
-        mUndiscoverBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickUndiscover(v);
-            }
-        });
-        mDisconnectBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickDisconnect(v);
-            }
-        });
         mSendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,6 +267,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             int groupId = GroupContent.ITEMS.get(position).id;
             mListener.onGroupedSelected(groupId);
             mNsdHelper.selectGroup(groupId);
+            Thread runConnect = new Thread(new ConnectHostThread(mNsdHelper, mConnection));
+            runConnect.start();
         }
     }
 
@@ -297,42 +303,38 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     /*
      *  Testing Button and TextView
      */
-    public void clickAdvertise(View v) {
-        // Register service
-        if (mConnection.getLocalPort() > -1) {
-            mNsdHelper.registerService(mConnection.getLocalPort());
-        } else {
-            Log.d(TAG, "ServerSocket isn't bound.");
-            //TODO
-            //addChatLine("ServerSocket isn't bound.");
-        }
-    }
-    public void clickDiscover(View v) {
-        mNsdHelper.discoverServices();
-    }
-    public void clickConnect(View v) {
-        NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
-        if (service != null) {
-            Log.d(TAG, "Connecting.");
-            mConnection.connectToHost(service.getHost(),
-                    service.getPort(), null);
-        } else {
-            Log.d(TAG, "No service to connect to!");
-            //TODO
-            //addChatLine("No service to connect to!");
-        }
-    }
-    public void clickDeadvertise(View v) {
-        mNsdHelper.tearDown();
-    }
-
-    public void clickUndiscover(View v) {
-        mNsdHelper.stopDiscovery();
-    }
-
-    public void clickDisconnect(View v) {
-        mConnection.disconnectToServer();
-    }
+//    public void clickAdvertise(View v) {
+//        // Register service
+//        if (mConnection.getLocalPort() > -1) {
+//            mNsdHelper.registerService(mConnection.getLocalPort());
+//        } else {
+//            Log.d(TAG, "ServerSocket isn't bound.");
+//        }
+//    }
+//    public void clickDiscover(View v) {
+//        mNsdHelper.discoverServices();
+//    }
+//    public void clickConnect(View v) {
+//        NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
+//        if (service != null) {
+//            Log.d(TAG, "Connecting.");
+//            mConnection.connectToHost(service.getHost(),
+//                    service.getPort(), null);
+//        } else {
+//            Log.d(TAG, "No service to connect to!");
+//        }
+//    }
+//    public void clickDeadvertise(View v) {
+//        mNsdHelper.tearDown();
+//    }
+//
+//    public void clickUndiscover(View v) {
+//        mNsdHelper.stopDiscovery();
+//    }
+//
+//    public void clickDisconnect(View v) {
+//        mConnection.disconnectToServer();
+//    }
 
     public void clickSend(View v) {
         if (mEditMsg != null) {
@@ -369,7 +371,6 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mConnection.tearDown();
             mConnection = null;
         }
-
         super.onPause();
 
     }
@@ -387,6 +388,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                     mSettings.getString("destination", "5717 Hobart St. Pittsburgh, 15213")
             );
             mNsdHelper.initializeNsd();
+            mNsdHelper.discoverServices();
         }
     }
     @Override
@@ -403,6 +405,36 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         super.onStop();
     }
 
+    private class ConnectHostThread implements Runnable {
+
+        private ChatConnection mConnection = null;
+        private NsdHelper mNsdHelper = null;
+
+        ConnectHostThread(NsdHelper nsd, ChatConnection conn) {
+            mNsdHelper = nsd;
+            mConnection = conn;
+        }
+
+        @Override
+        public void run() {
+            NsdServiceInfo service;
+            while ((service = mNsdHelper.getChosenServiceInfo()) == null) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+                }
+            }
+            if (service != null) {
+                Log.d(TAG, "Connecting.");
+                mConnection.connectToHost(service.getHost(),
+                        service.getPort(), null);
+                mConnection.sendHandlerMessage("error", "Connected to Host", -1, false, SYSTEM_SENDER);
+            } else {
+                Log.d(TAG, "No service to connect to!");
+            }
+        }
+    }
 //    @Override
 //    public void onDestroy() {
 //        mNsdHelper.tearDown();
