@@ -2,6 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context="edu.cmu.group08.p2pcarpool.fragment.HomeFragment">
 
+    <!--
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="341dp"
@@ -9,16 +11,6 @@
         android:layout_gravity="center_horizontal|bottom"
         android:weightSum="1">
 
-        <!--<Button-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/search_button"-->
-            <!--android:id="@+id/search_button"-->
-            <!--android:layout_weight="0.10"-->
-            <!--android:textSize="25dp"-->
-            <!--android:layout_margin="5dp"-->
-            <!--android:background="#394e9d"-->
-            <!--android:textColor="#ffffffff" />-->
 
         <Button
             android:layout_width="wrap_content"
@@ -35,5 +27,99 @@
         android:layout_gravity="center_horizontal|top"
         android:src="@drawable/home01"
         android:layout_marginTop="30dp" />
+    -->
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/actionbar"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="50dp"
+            android:src="@drawable/ic_launcher2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imgLogo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/title"
+            android:textColor="@color/white"
+            android:textSize="25dp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="20dp" >
+
+
+            <Button
+                android:id="@+id/host_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:background="@color/bg_btn_join"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:text="@string/btn_host"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@color/bg_btn_join"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:text="@string/btn_search"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@color/bg_btn_join"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:text="@string/btn_profile"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+        <!-- author info -->
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/author_name"
+                android:textColor="@color/white"
+                android:textSize="12dp" />
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </FrameLayout>

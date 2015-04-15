@@ -27,7 +27,8 @@ public class HomeFragment extends Fragment {
     private String mParam2;
 
     private Button mHostButton;
-
+    private Button mProfileButton;
+    private Button mSearchButton;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -73,14 +74,25 @@ public class HomeFragment extends Fragment {
                     .commit();
             }
         });
-//        mSearchButton = (Button) findViewById(R.id.search_button);
-//
-//        mSearchButton.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                Intent intent = new Intent(v.getContext(), SearchActivity.class);
-//                startActivity(intent);
-//            }
-//        });
+        mProfileButton = (Button) view.findViewById(R.id.btnProfile);
+        mProfileButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ProfileFragment profileFragment = new ProfileFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, profileFragment)
+                        .commit();
+            }
+        });
+        mSearchButton = (Button) view.findViewById(R.id.btnSearch);
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SearchFragment searchFragment = new SearchFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, searchFragment)
+                        .commit();
+            }
+        });
+
         return view;
     }
 

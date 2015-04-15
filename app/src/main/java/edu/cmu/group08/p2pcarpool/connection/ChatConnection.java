@@ -53,6 +53,7 @@ public class ChatConnection {
     private HashMap<String, ChatClient> mChatClients = new HashMap<>();
 
     private static final String TAG = "ChatConnection";
+    private static final String SYSTEM_SENDER = "System Message";
     private static final String DUMMY = "GROUP08";
     private static final String CHAT_MESSAGE = "chat";
     private static final String TEARDOWN_MESSAGE = "tear_down";
@@ -232,33 +233,16 @@ public class ChatConnection {
         mPort = port;
     }
 
-//    public synchronized void updateMessages(String msg, boolean local) {
-//        Log.e(TAG, "Updating message: " + msg);
-//
-//        if (local) {
-//            msg = "me: " + msg;
-//        } else {
-//            msg = "them: " + msg;
-//        }
-//
-//        sendHandlerMessage("chat", msg, -1);
-//
-//    }
-
     private String patchMessage(String type, String msg, String sender) {
         return type + ":" + sender + ":" + msg;
-//        return type + ":" + msg;
     }
 
     private String[] unpatchMessage(String patchedMsg) {
         return patchedMsg.split(":", 3);
-//        return patchedMsg.split(":", 2);
     }
 
-    //For Chat Message ONLY
+
     public synchronized void sendHandlerMessage(String op, String msg, int id, boolean self, String sender) {
-        Log.d(TAG, "Sender:" + sender);
-        Log.d(TAG, "Message:" + msg);
         Bundle messageBundle = new Bundle();
         messageBundle.putString("op", op);
         messageBundle.putString("msg", msg);
@@ -270,16 +254,6 @@ public class ChatConnection {
         mUpdateHandler.sendMessage(message);
     }
 
-    //For other use.
-    public synchronized void sendHandlerMessage(String op, String msg, int id) {
-        Bundle messageBundle = new Bundle();
-        messageBundle.putString("op", op);
-        messageBundle.putString("msg", msg);
-        messageBundle.putInt("id", id);
-        Message message = new Message();
-        message.setData(messageBundle);
-        mUpdateHandler.sendMessage(message);
-    }
 
     /*
      *  ChatServer Class
@@ -327,7 +301,7 @@ public class ChatConnection {
                     setLocalPort(mServerSocket.getLocalPort());
 
                     sendHandlerMessage("error",
-                            mServerSocket.getInetAddress().toString()+":"+Integer.toString(mServerSocket.getLocalPort()), -1);
+                            mServerSocket.getInetAddress().toString()+":"+Integer.toString(mServerSocket.getLocalPort()), -1,false,SYSTEM_SENDER);
 
                     while (!Thread.currentThread().isInterrupted()) {
                         Log.d(TAG, "ServerSocket Created, awaiting connection");
@@ -342,7 +316,8 @@ public class ChatConnection {
 
                         // mHostAddress is fulfilled only when user click connect to Host
                         if (mHostAddress == null) {
-                            sendHandlerMessage("join", ip_port, -1);
+                            //TODO Showing name instead of ip_port makes more sense.
+                            sendHandlerMessage("join", ip_port + "has joined", -1,false,SYSTEM_SENDER);
                             Thread updateThread = new Thread(new UpdateClientListThread());
                             updateThread.start();
                         }
@@ -522,7 +497,9 @@ public class ChatConnection {
 
                     String[] t = unpatchMessage(msg);
                     if (t[0].equals(CHAT_MESSAGE)) {
-                        sendHandlerMessage("chat", t[2], -1, true, t[1]);
+                        // Send Handler message here will result in multiple message.
+                        // Commenting out.
+                        //sendHandlerMessage("chat", t[2], -1, true, t[1]);
                     }
                 }
 
@@ -613,7 +590,8 @@ public class ChatConnection {
                                 sendHandlerMessage("chat", msg, -1, false, sender);
                             }
                             else if (type.equals(TEARDOWN_MESSAGE)) {
-                                sendHandlerMessage("leave", ip_port, -1);
+                                //sendHandlerMessage("leave", ip_port, -1,false,SYSTEM_SENDER);
+                                sendHandlerMessage("leave", ip_port + "has left", -1,false,SYSTEM_SENDER);
                                 tearDownClientWithIp(ip_port, false);
                             }
                             else if (type.equals(UPDATE_CLIENT_LIST)) {

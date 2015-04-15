@@ -29,7 +29,9 @@
     <string name="title">P2P Car Pooling</string>
     <string name="author_name">By Kenny Sung, Yin Lin, Kaidi Yan</string>
     <string name="enter_name">Enter your name</string>
-    <string name="btn_join">JOIN</string>
+    <string name="btn_host">HOST</string>
+    <string name="btn_search">SEARCH</string>
+    <string name="btn_profile">PROFILE</string>
     <string name="btn_send">Send</string>
 
 </resources>

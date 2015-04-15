@@ -32,6 +32,7 @@ public class NsdHelper {
     enum Status {STARTED, STOPPED, REGISTERED, UNREGISTERED};
 
     public static final String DISCOVER_HEADER = "NSDDISCOVER:";
+    private static final String SYSTEM_SENDER = "System Message";
     public static final String SERVICE_TYPE = "_http._tcp.";
     public static final String TAG = "NsdHelper";
     public String mServiceName = "";
@@ -137,7 +138,7 @@ public class NsdHelper {
                 mService = serviceInfo;
                 Log.e(TAG, "IP" + mService.getHost().toString());
                 Log.e(TAG, "PORT" + Integer.toString(mService.getPort()));
-                sendHandlerMessage("error", mService.getHost().toString()+":"+Integer.toString(mService.getPort()), -1);
+                sendHandlerMessage("error", mService.getHost().toString()+":"+Integer.toString(mService.getPort()), -1, false, SYSTEM_SENDER);
             }
         };
     }
@@ -171,7 +172,7 @@ public class NsdHelper {
 
     public void addCandidate(NsdServiceInfo service) {
         mServiceCandidate.put(mGroupId, service);
-        sendHandlerMessage("add", service.getServiceName(), mGroupId);
+        sendHandlerMessage("add", service.getServiceName() + " added", mGroupId,false,SYSTEM_SENDER);
         mGroupId++;
     }
 
@@ -188,7 +189,7 @@ public class NsdHelper {
             }
         }
         if (groupId > -1) {
-            sendHandlerMessage("remove", service.getServiceName(), groupId);
+            sendHandlerMessage("remove", service.getServiceName() + " removed", groupId,false,SYSTEM_SENDER);
         }
     }
 
@@ -215,7 +216,7 @@ public class NsdHelper {
 
     public synchronized void discoverServices() {
         if (mDiscoveryStatus == Status.STOPPED && mNsdManager != null) {
-            sendHandlerMessage("clear_all", null, -1);
+            sendHandlerMessage("clear_all", null, -1, false, SYSTEM_SENDER);
             mNsdManager.discoverServices(
                     SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
             mDiscoveryStatus = Status.STARTED;
@@ -233,13 +234,18 @@ public class NsdHelper {
         return mService;
     }
 
-    public synchronized void sendHandlerMessage(String op, String msg, int id) {
+
+    public synchronized void sendHandlerMessage(String op, String msg, int id, boolean self, String sender) {
         Bundle messageBundle = new Bundle();
         messageBundle.putString("op", op);
         messageBundle.putString("msg", msg);
         messageBundle.putInt("id", id);
+        messageBundle.putString("sender", sender);
+        messageBundle.putBoolean("self", self);
         Message message = new Message();
         message.setData(messageBundle);
         mHandler.sendMessage(message);
     }
+
+
 }

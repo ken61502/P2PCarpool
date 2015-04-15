@@ -90,31 +90,6 @@ public class HostFragment extends Fragment {
         mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
         mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
 
-//        mUpdateHandler = new Handler() {
-//            @Override
-//            public void handleMessage(Message msg) {
-//                String operation = msg.getData().getString("op");
-//                String message = msg.getData().getString("msg");
-//                int group_id = msg.getData().getInt("id");
-//
-//                if (operation.equals("chat")) {
-//                    Log.d(TAG, "Received Message: " + message);
-//                    addChatLine(message);
-//                }
-//                else if (operation.equals("error")) {
-//                    Log.e(TAG, "Received Debug: " + message);
-////                    addChatLine(message);
-//                }
-//                else if (operation.equals("join")) {
-//                    Log.e(TAG, message + " has joined");
-//                    addChatLine(message + " has joined");
-//                }
-//                else if (operation.equals("leave")) {
-//                    Log.e(TAG, message + " has leaved");
-//                    addChatLine(message + " has leaved");
-//                }
-//            }
-//        };
         mUpdateHandler = new Handler() {
             //Receiver side message should be displayed at left.
 
@@ -122,26 +97,22 @@ public class HostFragment extends Fragment {
             public void handleMessage(Message msg) {
                 String operation = msg.getData().getString("op");
                 String message = msg.getData().getString("msg");
-                int group_id = msg.getData().getInt("id");
+                //int group_id = msg.getData().getInt("id");
                 if (operation.equals("chat")) {
-                    Log.d(TAG, "Sender:" + msg.getData().getString("sender"));
-                    Log.d(TAG, "Message:" + msg.getData().getString("msg"));
-                    Log.d(TAG, "Self:" + msg.getData().getBoolean("self"));
                     addChatLine(msg);
                 }
                 else if (operation.equals("error")) {
                     Log.e(TAG, "Received Debug: " + message);
-//                    addChatLine(message);
+                    addChatLine(msg);
                 }
                 else if (operation.equals("join")) {
                     Log.e(TAG, message + " has joined");
                 //TODO add system message display in the middle
-//                    addChatLine(message + " has joined");
+                    addChatLine(msg);
                 }
                 else if (operation.equals("leave")) {
-                    Log.e(TAG, message + " has leaved");
-                //TODO
-//                    addChatLine(message + " has left");
+                    Log.e(TAG, message + " has left");
+                    addChatLine(msg);
                 }
             }
         };
@@ -199,21 +170,12 @@ public class HostFragment extends Fragment {
             }
         });
     }
-//    public void clickSend(View v) {
-//        if (mEditMsg != null) {
-//            String msg = mEditMsg.getText().toString();
-//            if (!msg.isEmpty()) {
-//                addChatLine(msg);
-//                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg);
-//                mEditMsg.setText("");
-//            }
-//        }
-//    }
+
     public void clickSend(View v) {
         if (mEditMsg != null) {
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
-
+                mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","Invalid"));
                 mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }

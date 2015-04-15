@@ -20,7 +20,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.cmu.group08.p2pcarpool.connection.ChatConnection;
 import edu.cmu.group08.p2pcarpool.connection.NsdHelper;
@@ -64,7 +68,12 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
-    private TextView mStatusView;
+
+    //private TextView mStatusView;
+    private ListView mStatusView;
+    private List<Message> listMessages;
+    private MessagesListAdapter adapter;
+
     private EditText mEditMsg;
     private Button mAdvertiseBtn;
     private Button mDiscoverBtn;
@@ -112,8 +121,13 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
 
-        mStatusView = (TextView) view.findViewById(R.id.status);
-        mStatusView.setMovementMethod(new ScrollingMovementMethod());
+        mStatusView = (ListView) view.findViewById(R.id.message_window);
+        listMessages = new ArrayList<Message>();
+        Context context = getActivity().getApplicationContext();
+        adapter = new MessagesListAdapter(context, listMessages);
+        mStatusView.setAdapter(adapter);
+
+
         initializeOnClickListener(view);
 
         mEditMsg = (EditText) view.findViewById(R.id.msg_input);
@@ -128,18 +142,20 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
 
                 if (operation.equals("add")) {
                     GroupContent.addItem(new GroupContent.Group(group_id, message));
+                    //TODO
                 }
                 else if (operation.equals("remove")) {
                     GroupContent.removeItem(group_id);
+                    //TODO
                 }
                 else if (operation.equals("chat")) {
                     Log.d(TAG, "Received Message: " + message);
-                    addChatLine(message);
+                    addChatLine(msg);
 //                    GroupContent.clearAll();
                 }
                 else if (operation.equals("error")) {
                     Log.e(TAG, "Received Debug: " + message);
-                    addChatLine(message);
+                    addChatLine(msg);
 //                    GroupContent.clearAll();
                 }
                 else if (operation.equals("clear_all")) {
@@ -287,7 +303,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mNsdHelper.registerService(mConnection.getLocalPort());
         } else {
             Log.d(TAG, "ServerSocket isn't bound.");
-            addChatLine("ServerSocket isn't bound.");
+            //TODO
+            //addChatLine("ServerSocket isn't bound.");
         }
     }
     public void clickDiscover(View v) {
@@ -301,7 +318,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                     service.getPort(), null);
         } else {
             Log.d(TAG, "No service to connect to!");
-            addChatLine("No service to connect to!");
+            //TODO
+            //addChatLine("No service to connect to!");
         }
     }
     public void clickDeadvertise(View v) {
@@ -320,15 +338,24 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         if (mEditMsg != null) {
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
-                addChatLine(msg);
+                mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","Invalid"));
                 mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }
         }
     }
 
-    public void addChatLine(String line) {
-        mStatusView.append("\n" + line);
+    public void addChatLine(Message msg) {
+        Bundle messageBundle = new Bundle();
+        messageBundle.putString("op", CHAT_MESSAGE);
+        messageBundle.putString("sender", msg.getData().getString("sender"));
+        messageBundle.putBoolean("self",msg.getData().getBoolean("self"));
+        messageBundle.putString("msg", msg.getData().getString("msg"));
+        messageBundle.putInt("id", -1);
+        Message message = new Message();
+        message.setData(messageBundle);
+        listMessages.add(message);
+        adapter.notifyDataSetChanged();
     }
 
     @Override

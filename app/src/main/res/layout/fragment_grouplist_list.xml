@@ -7,7 +7,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -60,34 +61,77 @@
                 android:onClick="clickDisconnect"
                 android:text="disconnect" />
         </LinearLayout>
+        <!--
+                <TextView
+                    android:id="@+id/status"
+                    android:layout_width="fill_parent"
+                    android:layout_height="221dp"
+                    android:focusable="true"
+                    android:maxLines = "12"
+                    android:scrollbars = "vertical"/>
 
-        <TextView
-            android:id="@+id/status"
+                <EditText
+                    android:id="@+id/msg_input"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:singleLine="true" />
+
+                <Button
+                    android:id="@+id/send_btn"
+                    android:layout_width="96dp"
+                    android:layout_height="64dp"
+                    android:onClick="clickSend"
+                    android:text="send" />
+            -->
+
+        <ListView
+            android:id="@+id/message_window"
             android:layout_width="fill_parent"
-            android:layout_height="221dp"
-            android:focusable="true"
-            android:maxLines = "12"
-            android:scrollbars = "vertical"/>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:divider="@null"
+            android:transcriptMode="alwaysScroll"
+            android:stackFromBottom="true">
+        </ListView>
 
-        <EditText
-            android:id="@+id/msg_input"
+
+
+
+        <LinearLayout
+            android:id="@+id/llMsgCompose"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:singleLine="true" />
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:weightSum="3" >
 
-        <Button
-            android:id="@+id/send_btn"
-            android:layout_width="96dp"
-            android:layout_height="64dp"
-            android:onClick="clickSend"
-            android:text="send" />
+            <EditText
+                android:id="@+id/msg_input"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="2"
+                android:background="@color/bg_msg_input"
+                android:textColor="@color/text_msg_input"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"/>
+
+            <Button
+                android:id="@+id/send_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/bg_btn_join"
+                android:onClick="clickSend"
+                android:textColor="@color/white"
+                android:text="@string/btn_send" />
+
+        </LinearLayout>
 
         <ListView android:id="@android:id/list" android:layout_width="match_parent"
-            android:layout_height="288dp" />
+            android:layout_height="130dp" />
 
-        <TextView android:id="@android:id/empty" android:layout_width="match_parent"
-            android:layout_height="match_parent" android:gravity="center" />
 
     </LinearLayout>
 </FrameLayout>
