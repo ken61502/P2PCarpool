@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     private static final String UPDATE_CLIENT_LIST = "update_client_list";
     private static final String UPDATE_CLIENT_SERVER_IP = "update_client_server_ip";
     private static final String SYSTEM_SENDER = "System Message";
+    private static final String CONNECTED_MSG = "Connected to Host";
 
 
 
@@ -76,16 +78,11 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     private List<Message> listMessages;
     private MessagesListAdapter adapter;
 
-    private EditText mEditMsg;
-    private Button mAdvertiseBtn;
-    private Button mDiscoverBtn;
-    private Button mConnectBtn;
-
-    private Button mDeadvertiseBtn;
-    private Button mUndiscoverBtn;
-    private Button mDisconnectBtn;
-
     private Button mSendBtn;
+
+    private EditText mEditMsg;
+//    private TextView mText;
+    private LinearLayout linearLayout;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
@@ -156,6 +153,9 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 }
                 else if (operation.equals("error")) {
                     Log.e(TAG, "Received Debug: " + message);
+                    if (message.equals(CONNECTED_MSG)) {
+                        setVisibilityMode(true);
+                    }
                     addChatLine(msg);
 //                    GroupContent.clearAll();
                 }
@@ -180,6 +180,9 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mNsdHelper.discoverServices();
         }
 
+//        mText = (TextView) view.findViewById(R.id.searchText);
+        linearLayout = (LinearLayout) view.findViewById(R.id.llMsgCompose);
+        setVisibilityMode(false);
         return view;
     }
 
@@ -360,6 +363,21 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         adapter.notifyDataSetChanged();
     }
 
+    private void setVisibilityMode(boolean chatting) {
+        if (chatting) {
+//            mText.setVisibility(View.GONE);
+            linearLayout.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+            mStatusView.setVisibility(View.VISIBLE);
+        }
+        else {
+//            mText.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+            mStatusView.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void onPause() {
         if (mNsdHelper != null) {
@@ -371,6 +389,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mConnection.tearDown();
             mConnection = null;
         }
+        setVisibilityMode(false);
         super.onPause();
 
     }
@@ -402,6 +421,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mConnection.tearDown();
             mConnection = null;
         }
+        setVisibilityMode(false);
         super.onStop();
     }
 
@@ -418,9 +438,14 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         @Override
         public void run() {
             NsdServiceInfo service;
+            int counter = 0;
             while ((service = mNsdHelper.getChosenServiceInfo()) == null) {
                 try {
+                    if (counter > 20) {
+                        break;
+                    }
                     Thread.sleep(500);
+                    counter++;
                 } catch (InterruptedException e) {
 //                    e.printStackTrace();
                 }
@@ -429,7 +454,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 Log.d(TAG, "Connecting.");
                 mConnection.connectToHost(service.getHost(),
                         service.getPort(), null);
-                mConnection.sendHandlerMessage("error", "Connected to Host", -1, false, SYSTEM_SENDER);
+                mConnection.sendHandlerMessage("error", CONNECTED_MSG, -1, false, SYSTEM_SENDER);
             } else {
                 Log.d(TAG, "No service to connect to!");
             }

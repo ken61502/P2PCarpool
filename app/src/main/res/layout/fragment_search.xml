@@ -84,7 +84,16 @@
                     android:onClick="clickSend"
                     android:text="send" />
             -->
-
+        <!--<TextView-->
+            <!--android:id="@+id/searchText"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/imgLogo"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:layout_marginTop="0dp"-->
+            <!--android:text="Searching...."-->
+            <!--android:textColor="#ff24784c"-->
+            <!--android:textSize="25dp" />-->
         <ListView
             android:id="@+id/message_window"
             android:layout_width="fill_parent"
