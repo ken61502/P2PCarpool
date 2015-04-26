@@ -1,19 +1,36 @@
 package edu.cmu.group08.p2pcarpool.connection;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * Created by kenny on 2015/4/8.
  */
 public class GroupMessage implements Serializable {
-    public int type;
+    public boolean isMulticast;
+    public String type;
     public String message;
-    public GroupMessage(int t, String m) {
+    public String sender;
+    public HashMap<String, Object> data;
+    public GroupMessage(String t, String m, String s, boolean ism) {
         type = t;
         message = m;
+        sender = s;
+        data = new HashMap<>();
+        isMulticast = ism;
     }
+
+    public String[] unpack() {
+        String[] res = {type, sender, message};
+        return res;
+    }
+
     @Override
     public String toString(){
-        return "Type:"+Integer.toString(type)+"Message:"+message;
+        StringBuilder sb = new StringBuilder();
+        return sb
+                .append("Type: " + type + "\n")
+                .append("Message: " + message)
+                .toString();
     }
 }

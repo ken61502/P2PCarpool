@@ -24,6 +24,7 @@ import java.util.List;
 import edu.cmu.group08.p2pcarpool.connection.ChatConnection;
 import edu.cmu.group08.p2pcarpool.connection.NsdHelper;
 import edu.cmu.group08.p2pcarpool.R;
+import edu.cmu.group08.p2pcarpool.connection.Settings;
 
 
 /**
@@ -37,9 +38,9 @@ public class HostFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "CarpoolHost";
-    private static final String PROFILE_NAME = "Profile";
-    private static final String TEARDOWN_MESSAGE = "tear_down";
-    private static final String CHAT_MESSAGE = "chat";
+//    private static final String PROFILE_NAME = "Profile";
+//    private static final String TEARDOWN_MESSAGE = "tear_down";
+//    private static final String CHAT_MESSAGE = "chat";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -87,7 +88,7 @@ public class HostFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
+        mSettings = getActivity().getSharedPreferences(Settings.PROFILE_NAME, 0);
         mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
 
         mUpdateHandler = new Handler() {
@@ -114,11 +115,19 @@ public class HostFragment extends Fragment {
                     Log.e(TAG, message + " has left");
                     addChatLine(msg);
                 }
+                else if (operation.equals("stop_accept")) {
+                    Log.e(TAG, "Stop Accepting");
+                    mNsdHelper.tearDown();
+                }
+                else if (operation.equals("start_accept")) {
+                    Log.e(TAG, "Start Accepting");
+                    mNsdHelper.registerService(mConnection.getLocalPort());
+                }
             }
         };
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler, mWifi);
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi, Integer.parseInt(mSettings.getString("max_passengers", "2")));
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
@@ -176,7 +185,7 @@ public class HostFragment extends Fragment {
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
                 mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","Invalid"));
-                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
+                mConnection.sendMulticastMessage(Settings.CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }
         }
@@ -189,7 +198,7 @@ public class HostFragment extends Fragment {
         //Attention
         //Must do a copy of the message and then add it to
         Bundle messageBundle = new Bundle();
-        messageBundle.putString("op", CHAT_MESSAGE);
+        messageBundle.putString("op", Settings.CHAT_MESSAGE);
         messageBundle.putString("sender", msg.getData().getString("sender"));
         messageBundle.putBoolean("self",msg.getData().getBoolean("self"));
         messageBundle.putString("msg", msg.getData().getString("msg"));
@@ -220,7 +229,7 @@ public class HostFragment extends Fragment {
         super.onResume();
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler, mWifi);
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi, Integer.parseInt(mSettings.getString("max_passengers", "4")));
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(

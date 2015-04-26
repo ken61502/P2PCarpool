@@ -30,6 +30,7 @@ import java.util.List;
 import edu.cmu.group08.p2pcarpool.connection.ChatConnection;
 import edu.cmu.group08.p2pcarpool.connection.NsdHelper;
 import edu.cmu.group08.p2pcarpool.R;
+import edu.cmu.group08.p2pcarpool.connection.Settings;
 import edu.cmu.group08.p2pcarpool.group.GroupContent;
 
 /**
@@ -48,21 +49,6 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     private ChatConnection mConnection = null;
     private NsdHelper mNsdHelper = null;
     private Handler mUpdateHandler;
-
-    public static final String PROFILE_NAME = "Profile";
-
-    private static final String CHAT_MESSAGE = "chat";
-    private static final String TEARDOWN_MESSAGE = "tear_down";
-    private static final String UPDATE_CLIENT_LIST = "update_client_list";
-    private static final String UPDATE_CLIENT_SERVER_IP = "update_client_server_ip";
-    private static final String SYSTEM_SENDER = "System Message";
-    private static final String CONNECTED_MSG = "Connected to Host";
-
-
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnGroupedSelectedListener mListener;
 
@@ -108,7 +94,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 android.R.layout.simple_list_item_1, android.R.id.text1, GroupContent.ITEMS);
 
         mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
-        mSettings = getActivity().getSharedPreferences(PROFILE_NAME, 0);
+        mSettings = getActivity().getSharedPreferences(Settings.PROFILE_NAME, 0);
     }
 
     @Override
@@ -153,7 +139,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 }
                 else if (operation.equals("error")) {
                     Log.e(TAG, "Received Debug: " + message);
-                    if (message.equals(CONNECTED_MSG)) {
+                    if (message.equals(Settings.CONNECTED_MSG)) {
                         setVisibilityMode(true);
                     }
                     addChatLine(msg);
@@ -168,7 +154,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         };
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler, mWifi);
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
@@ -344,7 +330,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
                 mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","Invalid"));
-                mConnection.sendMulticastMessage(CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
+                mConnection.sendMulticastMessage(Settings.CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
                 mEditMsg.setText("");
             }
         }
@@ -352,7 +338,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
 
     public void addChatLine(Message msg) {
         Bundle messageBundle = new Bundle();
-        messageBundle.putString("op", CHAT_MESSAGE);
+        messageBundle.putString("op", Settings.CHAT_MESSAGE);
         messageBundle.putString("sender", msg.getData().getString("sender"));
         messageBundle.putBoolean("self",msg.getData().getBoolean("self"));
         messageBundle.putString("msg", msg.getData().getString("msg"));
@@ -398,7 +384,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         super.onResume();
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mUpdateHandler, mWifi);
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi);
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
@@ -454,7 +440,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 Log.d(TAG, "Connecting.");
                 mConnection.connectToHost(service.getHost(),
                         service.getPort(), null);
-                mConnection.sendHandlerMessage("error", CONNECTED_MSG, -1, false, SYSTEM_SENDER);
+                mConnection.sendHandlerMessage("error", Settings.CONNECTED_MSG, -1, false, Settings.SYSTEM_SENDER);
             } else {
                 Log.d(TAG, "No service to connect to!");
             }

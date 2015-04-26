@@ -123,8 +123,8 @@ public class NsdHelper {
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                 Log.e(TAG, "Resolve failed" + errorCode);
-                stopDiscovery();
-                discoverServices();
+//                stopDiscovery();
+//                discoverServices();
             }
 
             @Override
@@ -148,6 +148,7 @@ public class NsdHelper {
 
             @Override
             public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
+                Log.d(TAG, "Service Registered");
                 mServiceName = NsdServiceInfo.getServiceName().substring(DISCOVER_HEADER.length());
             }
             
