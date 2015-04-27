@@ -51,6 +51,7 @@ public class ChatConnection {
     private Handler mUpdateHandler = null;
     private ChatServer mChatServer = null;
     private HashMap<String, ChatClient> mChatClients = new HashMap<>();
+    private HashMap<String, String> mIpToName = new HashMap<>();
 
     private static final String TAG = "ChatConnection";
 
@@ -82,6 +83,7 @@ public class ChatConnection {
     public void updateClientServerIp(String client_ip_port, String server_port, String name) {
         if (mChatClients.containsKey(client_ip_port)) {
             mChatClients.get(client_ip_port).setServerAddressPortName(client_ip_port, server_port, name);
+            sendHandlerMessage("join", name + " has joined.", -1, false, Settings.SYSTEM_SENDER);
             Log.d(TAG, "Client Name:" + name + " received");
         }
         else {
@@ -90,16 +92,20 @@ public class ChatConnection {
     }
 
     public void updateClientList(String ip_list) {
-        String[] ips = ip_list.split(",");
+        String[] ips_name = ip_list.split(",");
         String local_ip = getIpAddress().toString();
-        for (int i = 0; i < ips.length; i++) {
-            String ip_port = ips[i];
+        for (int i = 0; i < ips_name.length; i++) {
+            String[] tokens_tmp = ips_name[i].split("=", 2);
+            String ip_port = tokens_tmp[0];
+            String name = tokens_tmp[1];
             if (!mChatClients.containsKey(ip_port)) {
                 String[] tokens = ip_port.trim().split(":");
                 if (!tokens[0].equals(local_ip)) {
                     InetAddress addr;
                     try {
                         addr = InetAddress.getByName(tokens[0].replace("/",""));
+                        sendHandlerMessage("join", name + " has joined.", -1, false, Settings.SYSTEM_SENDER);
+                        mIpToName.put(ip_port, name);
                         if (local_ip.compareTo(tokens[0]) > 0) {
                             Log.d(TAG, "Connected to " + ip_port);
                             connectToRemote(addr, Integer.parseInt(tokens[1]), null);
@@ -178,6 +184,9 @@ public class ChatConnection {
         if (!mChatClients.isEmpty()) {
             tearDownAllClient();
         }
+        if (!mIpToName.isEmpty()) {
+            mIpToName.clear();
+        }
     }
 
     public void disconnectToServer() {
@@ -205,7 +214,16 @@ public class ChatConnection {
 
     public void tearDownClientWithIp(String ip_port, boolean flood) {
         if (mChatClients.containsKey(ip_port)) {
-            mChatClients.get(ip_port).tearDown(flood);
+            ChatClient client = mChatClients.get(ip_port);
+            String name = client.getName();
+            if (name.equals("")) {
+                name = mIpToName.get(ip_port);
+                if (name == null) {
+                    name = "";
+                }
+            }
+            sendHandlerMessage("leave", name + " has left.", -1, false, Settings.SYSTEM_SENDER);
+            client.tearDown(flood);
             mChatClients.remove(ip_port);
         }
         else {
@@ -335,8 +353,8 @@ public class ChatConnection {
                     mServerSocket = new ServerSocket(0);
                     setLocalPort(mServerSocket.getLocalPort());
 
-                    sendHandlerMessage("error",
-                            mServerSocket.getInetAddress().toString()+":"+Integer.toString(mServerSocket.getLocalPort()), -1,false,Settings.SYSTEM_SENDER);
+//                    sendHandlerMessage("error",
+//                            "sygroup room: listening to port=" + Integer.toString(mServerSocket.getLocalPort()), -1,false,Settings.SYSTEM_SENDER);
 
                     while (!Thread.currentThread().isInterrupted()) {
                         Log.d(TAG, "ServerSocket Created, awaiting connection");
@@ -353,7 +371,7 @@ public class ChatConnection {
                         // mHostAddress is fulfilled only when user click connect to Host
                         if (mHostAddress == null) {
                             //TODO Showing name instead of ip_port makes more sense.
-                            sendHandlerMessage("join", ip_port + "has joined", -1,false,Settings.SYSTEM_SENDER);
+//                            sendHandlerMessage("join", ip_port + "has joined", -1,false,Settings.SYSTEM_SENDER);
                             Thread updateThread = new Thread(new UpdateClientListThread());
                             updateThread.start();
                         }
@@ -389,7 +407,8 @@ public class ChatConnection {
 //                            e.printStackTrace();
                         }
                     }
-                    list += s_ip;
+                    String name = entry.getValue().getName();
+                    list += (s_ip + "=" + name);
                     while (it.hasNext()) {
                         entry = (Map.Entry<String, ChatClient>) it.next();
                         while((s_ip = entry.getValue().getServerIpPort()) == null) {
@@ -399,7 +418,8 @@ public class ChatConnection {
 //                            e.printStackTrace();
                             }
                         }
-                        list += ("," + s_ip);
+                        name = entry.getValue().getName();
+                        list += ("," + s_ip + "=" + name);
                     }
                     sendMulticastMessage(Settings.UPDATE_CLIENT_LIST, list, Settings.DUMMY);
 //                    it = mChatClients.entrySet().iterator();
@@ -483,6 +503,9 @@ public class ChatConnection {
             else {
                 return null;
             }
+        }
+        public String getName() {
+            return mClientName;
         }
         public InetAddress getServerAddress() {
             return mServerAddress;
@@ -644,7 +667,7 @@ public class ChatConnection {
                                     sendHandlerMessage("chat", msg, -1, false, sender);
                                 }
                                 else if (type.equals(Settings.TEARDOWN_MESSAGE)) {
-                                    sendHandlerMessage("leave", ip_port + "has left", -1,false,Settings.SYSTEM_SENDER);
+//                                    sendHandlerMessage("leave", ip_port + "has left", -1,false,Settings.SYSTEM_SENDER);
                                     tearDownClientWithIp(ip_port, false);
                                     checkPassengerLimit();
                                 }

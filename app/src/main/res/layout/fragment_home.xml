@@ -77,17 +77,6 @@
                 android:textColor="@color/white" />
 
             <Button
-                android:id="@+id/btnSearch"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:background="@color/bg_btn_join"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
-                android:text="@string/btn_search"
-                android:textColor="@color/white" />
-
-            <Button
                 android:id="@+id/btnProfile"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
@@ -96,6 +85,17 @@
                 android:paddingLeft="25dp"
                 android:paddingRight="25dp"
                 android:text="@string/btn_profile"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@color/bg_btn_join"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:text="@string/btn_search"
                 android:textColor="@color/white" />
 
         </LinearLayout>

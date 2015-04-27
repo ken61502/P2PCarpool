@@ -17,6 +17,7 @@
 package edu.cmu.group08.p2pcarpool.connection;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
@@ -31,7 +32,7 @@ import java.util.Map;
 public class NsdHelper {
     enum Status {STARTED, STOPPED, REGISTERED, UNREGISTERED};
 
-    public static final String DISCOVER_HEADER = "NSDDISCOVER:";
+    public static final String DISCOVER_HEADER = "CP:";
     private static final String SYSTEM_SENDER = "System Message";
     public static final String SERVICE_TYPE = "_http._tcp.";
     public static final String TAG = "NsdHelper";
@@ -45,6 +46,7 @@ public class NsdHelper {
     private NsdManager.ResolveListener mResolveListener;
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdManager.RegistrationListener mRegistrationListener;
+    private SharedPreferences mSettings;
     private Status mDiscoveryStatus = Status.STOPPED;
     private Status mRegistryStatus = Status.UNREGISTERED;
 
@@ -55,7 +57,14 @@ public class NsdHelper {
         mContext = context;
         mHandler = handler;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-        mServiceName = serviceName;
+        String service_info;
+        mSettings = mContext.getSharedPreferences(Settings.PROFILE_NAME, 0);
+        service_info = serviceName                                   + "#"
+                + mSettings.getString("price_per_passenger", "$ 10") + "#"
+//                + mSettings.getString("car", "BMW 428")              + "#"
+                + mSettings.getString("max_passengers", "4");
+        mServiceName = service_info;
+        Log.d(TAG, mServiceName);
     }
 
     public void initializeNsd() {
@@ -138,7 +147,7 @@ public class NsdHelper {
                 mService = serviceInfo;
                 Log.e(TAG, "IP" + mService.getHost().toString());
                 Log.e(TAG, "PORT" + Integer.toString(mService.getPort()));
-                sendHandlerMessage("error", mService.getHost().toString()+":"+Integer.toString(mService.getPort()), -1, false, SYSTEM_SENDER);
+//                sendHandlerMessage("error", mService.getHost().toString()+":"+Integer.toString(mService.getPort()), -1, false, SYSTEM_SENDER);
             }
         };
     }
@@ -173,7 +182,9 @@ public class NsdHelper {
 
     public void addCandidate(NsdServiceInfo service) {
         mServiceCandidate.put(mGroupId, service);
-        sendHandlerMessage("add", service.getServiceName() + " added", mGroupId,false,SYSTEM_SENDER);
+        String service_info = service.getServiceName();
+        service_info = service_info.replaceAll("\\([0-9]+\\)", "").trim();
+        sendHandlerMessage("add", service_info, mGroupId,false,SYSTEM_SENDER);
         mGroupId++;
     }
 

@@ -3,11 +3,13 @@ package edu.cmu.group08.p2pcarpool.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -31,6 +33,7 @@ import edu.cmu.group08.p2pcarpool.connection.ChatConnection;
 import edu.cmu.group08.p2pcarpool.connection.NsdHelper;
 import edu.cmu.group08.p2pcarpool.R;
 import edu.cmu.group08.p2pcarpool.connection.Settings;
+import edu.cmu.group08.p2pcarpool.gmap.GeocoderHelper;
 import edu.cmu.group08.p2pcarpool.group.GroupContent;
 
 /**
@@ -64,6 +67,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     private List<Message> listMessages;
     private MessagesListAdapter adapter;
 
+    private GeocoderHelper mGeocoder;
+
     private Button mSendBtn;
 
     private EditText mEditMsg;
@@ -87,14 +92,13 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-        }
-
-        mAdapter = new ArrayAdapter<GroupContent.Group>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, GroupContent.ITEMS);
+        mAdapter = new GroupContent.GroupAdapter(getActivity(), GroupContent.ITEMS);
+//        mAdapter = new ArrayAdapter<GroupContent.Group>(getActivity(),
+//                android.R.layout.simple_list_item_1, android.R.id.text1, GroupContent.ITEMS);
 
         mWifi = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
         mSettings = getActivity().getSharedPreferences(Settings.PROFILE_NAME, 0);
+        mGeocoder = new GeocoderHelper(getActivity(), mSettings);
     }
 
     @Override
@@ -125,7 +129,17 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 int group_id = msg.getData().getInt("id");
 
                 if (operation.equals("add")) {
-                    GroupContent.addItem(new GroupContent.Group(group_id, message));
+                    Log.e(TAG, message);
+                    String[] tokens = message.split(":", 2);
+                    if (tokens.length == 2) {
+                        tokens = tokens[1].split("#");
+                        if (tokens.length == 3) {
+                            String dest = tokens[0], price = tokens[1], max = tokens[2];
+                            String dist = mGeocoder.calcDestinationDistance(dest);
+                            GroupContent.addItem(new GroupContent.Group(group_id, dest, dist, "", "", max));
+                        }
+                    }
+
                     //TODO
                 }
                 else if (operation.equals("remove")) {
@@ -148,8 +162,15 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 else if (operation.equals("clear_all")) {
                     GroupContent.clearAll();
                 }
-
-                ((ArrayAdapter) mAdapter).notifyDataSetChanged();
+                else if (operation.equals("join")) {
+                    Log.e(TAG, message + " has joined");
+                    addChatLine(msg);
+                }
+                else if (operation.equals("leave")) {
+                    Log.e(TAG, message + " has left");
+//                    addChatLine(msg);
+                }
+                ((GroupContent.GroupAdapter) mAdapter).notifyDataSetChanged();
             }
         };
 
@@ -174,53 +195,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
 
     public void initializeOnClickListener(View view) {
 
-//        mAdvertiseBtn = (Button) view.findViewById(R.id.advertise_btn);
-//        mDiscoverBtn = (Button) view.findViewById(R.id.discover_btn);
-//        mConnectBtn = (Button) view.findViewById(R.id.connect_btn);
-//
-//        mDeadvertiseBtn = (Button) view.findViewById(R.id.deadvertise_btn);
-//        mUndiscoverBtn = (Button) view.findViewById(R.id.undiscover_btn);
-//        mDisconnectBtn = (Button) view.findViewById(R.id.disconnect_btn);
-
         mSendBtn = (Button) view.findViewById(R.id.send_btn);
-
-//        mAdvertiseBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickAdvertise(v);
-//            }
-//        });
-//        mDiscoverBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickDiscover(v);
-//            }
-//        });
-//        mConnectBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickConnect(v);
-//            }
-//        });
-//
-//        mDeadvertiseBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickDeadvertise(v);
-//            }
-//        });
-//        mUndiscoverBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickUndiscover(v);
-//            }
-//        });
-//        mDisconnectBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                clickDisconnect(v);
-//            }
-//        });
 
         mSendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -287,43 +262,6 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
     public interface OnGroupedSelectedListener {
         public void onGroupedSelected(Integer id);
     }
-
-
-    /*
-     *  Testing Button and TextView
-     */
-//    public void clickAdvertise(View v) {
-//        // Register service
-//        if (mConnection.getLocalPort() > -1) {
-//            mNsdHelper.registerService(mConnection.getLocalPort());
-//        } else {
-//            Log.d(TAG, "ServerSocket isn't bound.");
-//        }
-//    }
-//    public void clickDiscover(View v) {
-//        mNsdHelper.discoverServices();
-//    }
-//    public void clickConnect(View v) {
-//        NsdServiceInfo service = mNsdHelper.getChosenServiceInfo();
-//        if (service != null) {
-//            Log.d(TAG, "Connecting.");
-//            mConnection.connectToHost(service.getHost(),
-//                    service.getPort(), null);
-//        } else {
-//            Log.d(TAG, "No service to connect to!");
-//        }
-//    }
-//    public void clickDeadvertise(View v) {
-//        mNsdHelper.tearDown();
-//    }
-//
-//    public void clickUndiscover(View v) {
-//        mNsdHelper.stopDiscovery();
-//    }
-//
-//    public void clickDisconnect(View v) {
-//        mConnection.disconnectToServer();
-//    }
 
     public void clickSend(View v) {
         if (mEditMsg != null) {
@@ -446,6 +384,7 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             }
         }
     }
+
 //    @Override
 //    public void onDestroy() {
 //        mNsdHelper.tearDown();

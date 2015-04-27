@@ -108,26 +108,29 @@ public class HostFragment extends Fragment {
                 }
                 else if (operation.equals("join")) {
                     Log.e(TAG, message + " has joined");
-                //TODO add system message display in the middle
                     addChatLine(msg);
                 }
                 else if (operation.equals("leave")) {
                     Log.e(TAG, message + " has left");
-                    addChatLine(msg);
+//                    addChatLine(msg);
                 }
                 else if (operation.equals("stop_accept")) {
                     Log.e(TAG, "Stop Accepting");
-                    mNsdHelper.tearDown();
+                    if (mNsdHelper != null) {
+                        mNsdHelper.tearDown();
+                    }
                 }
                 else if (operation.equals("start_accept")) {
                     Log.e(TAG, "Start Accepting");
-                    mNsdHelper.registerService(mConnection.getLocalPort());
+                    if (mNsdHelper != null) {
+                        mNsdHelper.registerService(mConnection.getLocalPort());
+                    }
                 }
             }
         };
 
         if (mConnection == null) {
-            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi, Integer.parseInt(mSettings.getString("max_passengers", "2")));
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi, Integer.parseInt(mSettings.getString("max_passengers", "4")));
         }
         if (mNsdHelper == null) {
             mNsdHelper = new NsdHelper(
