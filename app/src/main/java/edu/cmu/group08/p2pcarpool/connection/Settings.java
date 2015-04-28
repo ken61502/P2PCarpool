@@ -12,4 +12,5 @@ public class Settings {
     public static final String UPDATE_CLIENT_LIST = "update_client_list";
     public static final String UPDATE_CLIENT_INFO = "update_client_info";
     public static final String CONNECTED_MSG = "Connected to Host";
+    public static final String KICK_OFF = "kick_off";
 }

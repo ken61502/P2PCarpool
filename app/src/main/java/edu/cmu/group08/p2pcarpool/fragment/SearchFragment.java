@@ -170,6 +170,10 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                     Log.e(TAG, message + " has left");
 //                    addChatLine(msg);
                 }
+                else if (operation.equals("reset")) {
+                    Log.e(TAG, "Reset");
+                    reset();
+                }
                 ((GroupContent.GroupAdapter) mAdapter).notifyDataSetChanged();
             }
         };
@@ -205,6 +209,37 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
         });
     }
 
+    public void reset() {
+        if (mNsdHelper != null) {
+            mNsdHelper.tearDown();
+            mNsdHelper.stopDiscovery();
+            mNsdHelper = null;
+        }
+        if (mConnection != null) {
+            mConnection.tearDown();
+            mConnection = null;
+        }
+
+        listMessages.clear();
+        adapter.notifyDataSetChanged();
+
+        setVisibilityMode(false);
+
+        if (mNsdHelper == null) {
+            mNsdHelper = new NsdHelper(
+                    getActivity(),
+                    mUpdateHandler,
+                    mSettings.getString("destination", "5717 Hobart St. Pittsburgh, 15213")
+            );
+
+            mNsdHelper.initializeNsd();
+            mNsdHelper.discoverServices();
+        }
+
+        if (mConnection == null) {
+            mConnection = new ChatConnection(mSettings.getString("name", "No Name"), mUpdateHandler, mWifi);
+        }
+    }
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -313,6 +348,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mConnection.tearDown();
             mConnection = null;
         }
+        listMessages.clear();
+        adapter.notifyDataSetChanged();
         setVisibilityMode(false);
         super.onPause();
 
@@ -345,6 +382,8 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
             mConnection.tearDown();
             mConnection = null;
         }
+        listMessages.clear();
+        adapter.notifyDataSetChanged();
         setVisibilityMode(false);
         super.onStop();
     }

@@ -187,8 +187,8 @@ public class HostFragment extends Fragment {
         if (mEditMsg != null) {
             String msg = mEditMsg.getText().toString();
             if (!msg.isEmpty()) {
-                mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","Invalid"));
-                mConnection.sendMulticastMessage(Settings.CHAT_MESSAGE, msg, mSettings.getString("name","Invalid"));
+                mConnection.sendHandlerMessage("chat", msg, -1, true, mSettings.getString("name","No Name"));
+                mConnection.sendMulticastMessage(Settings.CHAT_MESSAGE, msg, mSettings.getString("name","No Name"));
                 mEditMsg.setText("");
             }
         }
