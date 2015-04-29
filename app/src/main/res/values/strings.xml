@@ -2,9 +2,9 @@
     <string name="app_name">P2PCarpool</string>
 
     <string name="title_section1">Home</string>
-    <string name="title_section2">Profile</string>
-    <string name="title_section3">Search</string>
-    <string name="title_section4">Host</string>
+    <string name="title_section2">I\'m a driver!</string>
+    <string name="title_section3">I\'m a rider!</string>
+    <string name="title_section4">Profile</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

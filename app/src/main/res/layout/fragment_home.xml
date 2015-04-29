@@ -37,12 +37,12 @@
 
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="0dp"
             android:layout_marginTop="50dp"
             android:src="@drawable/ic_launcher2" />
 
@@ -67,35 +67,35 @@
 
             <Button
                 android:id="@+id/host_btn"
-                android:layout_width="120dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
                 android:background="@color/bg_btn_join"
                 android:paddingLeft="25dp"
                 android:paddingRight="25dp"
-                android:text="@string/btn_host"
-                android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/btnProfile"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:background="@color/bg_btn_join"
-                android:paddingLeft="25dp"
-                android:paddingRight="25dp"
-                android:text="@string/btn_profile"
+                android:text="@string/title_section2"
                 android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/btnSearch"
-                android:layout_width="120dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:background="@color/bg_btn_join"
                 android:paddingLeft="25dp"
                 android:paddingRight="25dp"
-                android:text="@string/btn_search"
+                android:text="@string/title_section3"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnProfile"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@color/bg_btn_join"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:text="@string/title_section4"
                 android:textColor="@color/white" />
 
         </LinearLayout>

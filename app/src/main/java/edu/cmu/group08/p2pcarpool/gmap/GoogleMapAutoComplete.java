@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -189,6 +190,9 @@ public class GoogleMapAutoComplete {
             String[] from = new String[]{"description"};
             int[] to = new int[]{android.R.id.text1};
             //for auto complete
+            if (result == null) {
+                result = new ArrayList<>();
+            }
             adapter = new SimpleAdapter(baseContext, result, android.R.layout.simple_list_item_1, from, to);
             autoPlace.setAdapter(adapter);
             adapter.notifyDataSetChanged();
