@@ -256,7 +256,7 @@ public class ChatConnection {
             if (name.equals("")) {
                 name = mIpToName.get(ip_port);
                 if (name == null) {
-                    name = "";
+                    name = "A rider";
                 }
             }
             sendHandlerMessage("leave", name + " has left.", -1, false, Settings.SYSTEM_SENDER);

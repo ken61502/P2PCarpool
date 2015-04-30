@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,11 +169,12 @@ public class SearchFragment extends Fragment implements AbsListView.OnItemClickL
                 }
                 else if (operation.equals("leave")) {
                     Log.e(TAG, message + " has left");
-//                    addChatLine(msg);
+                    addChatLine(msg);
                 }
                 else if (operation.equals("reset")) {
                     Log.e(TAG, "Reset");
                     reset();
+                    Toast.makeText(getActivity(), "Group room is full.", Toast.LENGTH_SHORT).show();
                 }
                 ((GroupContent.GroupAdapter) mAdapter).notifyDataSetChanged();
             }

@@ -112,7 +112,7 @@ public class HostFragment extends Fragment {
                 }
                 else if (operation.equals("leave")) {
                     Log.e(TAG, message + " has left");
-//                    addChatLine(msg);
+                    addChatLine(msg);
                 }
                 else if (operation.equals("stop_accept")) {
                     Log.e(TAG, "Stop Accepting");

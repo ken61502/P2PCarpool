@@ -89,8 +89,8 @@ public class NsdHelper {
                 Log.d(TAG, "Service discovery success" + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
-                } else if (service.getServiceName().equals(DISCOVER_HEADER + mServiceName)) {
-                    Log.d(TAG, "Same machine: " + DISCOVER_HEADER + mServiceName);
+//                } else if (service.getServiceName().equals(DISCOVER_HEADER + mServiceName)) {
+//                    Log.d(TAG, "Same machine: " + DISCOVER_HEADER + mServiceName);
                 } else if (service.getServiceName().startsWith(DISCOVER_HEADER)){
                     Log.d(TAG, "service.getServiceName()=" + service.getServiceName());
                     addCandidate(service);
